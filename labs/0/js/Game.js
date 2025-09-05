@@ -22,6 +22,21 @@ export class Game {
 
     startListening() {
         console.log('We will add event listeners to the buttons, they will return the order of button, we will check if it is correct');
+
+        for (const button of this.buttons) {
+            button.button.addEventListener('click', (e) => {
+                this.checkOrder(button.order);
+            });
+        }
+    }
+
+    checkOrder(buttonOrder) {
+        console.log(buttonOrder);
+
+        if (buttonOrder === this.cButton)
+            this.cButton++;
+        else
+            throw new Error('Wrong button order!');
     }
 
     scramble(numberOfButtons) {
@@ -45,18 +60,16 @@ export class Game {
     }
     
     startGame(numberOfButtons) {
+        this.cButton = 0;
         this.clearButtons();
-
-        const order = [];
 
         // Create buttons for the game
         for (let i = 0; i < numberOfButtons; i++) {
             const randomColor = Utils.randomColor();
-            const randomOrder = Utils.randomOrder(1, numberOfButtons, order);
-            const button = new RandomButton(randomOrder, randomColor);
+            const button = new RandomButton(i, randomColor);
 
-            order.push(randomOrder);
-            this.buttons[randomOrder - 1] = button;
+            this.buttons.push(button);
+            this.buttonContainer.appendChild(button.button);
         }
 
         // Add the buttons to the container in order

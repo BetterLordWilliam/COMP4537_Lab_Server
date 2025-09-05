@@ -26,14 +26,6 @@ export class Utils {
         return color;
     }
 
-    static randomOrder(min, max, exclude) {
-        while (true) {
-            const order = Math.floor(Math.random() * (max - min + 1) + min);
-            if (!exclude.includes(order))
-                return order;
-        }
-    }
-
     static randomPosition(buttonWidth, buttonHeight) {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
