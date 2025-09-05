@@ -13,6 +13,8 @@ class IndexController {
         this.defaultStateContainer = document.querySelector('#defaultState');
         this.gameStateContainer = document.querySelector('#gameState');
 
+        this.game = new Game(this);
+
         this.startGameForm.addEventListener('submit', (e) => this.startGame(e));
     }
 
@@ -38,7 +40,6 @@ class IndexController {
      * Handles game failure.
      */
     gameFailed() {
-        delete this.game;
         alert(Messages.gameFail);
         this.defaultState();
     }
@@ -47,7 +48,6 @@ class IndexController {
      * Handles game winning.
      */
     gameWon() {
-        delete this.game;
         alert(Messages.gameWon);
         this.defaultState();
     }
@@ -63,8 +63,7 @@ class IndexController {
         console.log(this.inputNumber.value);
 
         this.gameState();
-        this.game = new Game(this, this.inputNumber.value);
-        this.game.startGame();
+        this.game.startGame(this.inputNumber.value);
     }
 }
 

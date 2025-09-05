@@ -9,12 +9,11 @@ export class Game {
      * @param {IndexController} uiController the controller of the index page
      * @param {Number} numberOfButtons the number of buttons that the game will have
      */
-    constructor(uiController, numberOfButtons) {
+    constructor(uiController) {
         this.oneS = 1000;
         this.twoS = 2000;
 
         this.uiController = uiController;
-        this.numberOfButtons = numberOfButtons;
         this.buttons = [];
         this.cButton = 0;
         this.buttonContainer = uiController.gameStateContainer;
@@ -36,7 +35,6 @@ export class Game {
         while (this.buttonContainer.firstChild) {
             this.buttonContainer.removeChild(this.buttonContainer.firstChild);
         }
-        delete this.buttons;
         this.buttons = [];
     }
     
@@ -141,8 +139,12 @@ export class Game {
 
     /**
      * Creates game objects.
+     * 
+     * @param {Number} numberOfButtons the number of buttons to start the game with
      */
-    startGame() {
+    startGame(numberOfButtons) {
+        this.numberOfButtons = numberOfButtons;
+
         this.clearButtons();
         this.resetButtonCount();
         this.createGameButtons();
