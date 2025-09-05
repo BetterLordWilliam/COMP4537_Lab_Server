@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" translate="yes">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="device-wdith" initial-scale="1.0" />
+        <title>JavaScript Memory Game</title>
+        <link rel="stylesheet" href="/lab0/css/styles.css" />
+    </head>
+    <body>
+        <header>
+            <h1>JavaScript Memory Game</h1>
+            <h2>Will Otterbein, COMP4537, Lab 0</h2>
+            <p>Test your memory by clicking on the buttons in the correct order you are shown.</p>
+        </header>
+        <hr />
+        <br />
+        <form id="startGameForm">
+            <label for="startGameInumber">Input Number</label>
+            <input id="startGameInumber" name="startGameInumber" value="0" type="number" min="3" max="7" />
+            <input id="startGame" name="startGame" type="submit" value="Go!" />
+        </form>
+        <div id="gameArea">
+        </div>
+        <hr />
+        <footer>
+            <p>Will Otterbein</p> 
+            <p>COMP4537 Lab 0</p>
+            <p>2025</p>
+        </footer>
+        <script type="module" src="/lab0/js/Controller.js"></script>
+    </body>
+</html>

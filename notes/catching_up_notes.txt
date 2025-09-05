@@ -1,0 +1,4 @@
+https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller
+https://medium.com/@skhans/building-web-applications-with-express-js-a-comprehensive-guide-113a77be1b11
+https://expressjs.com/en/starter/static-files.html
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random

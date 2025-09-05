@@ -1,0 +1,26 @@
+{
+  "name": "comp4537_lab_0",
+  "version": "1.0.0",
+  "description": "Memory game.",
+  "homepage": "https://github.com/BetterLordWilliam/COMP4537_Lab_0#readme",
+  "bugs": {
+    "url": "https://github.com/BetterLordWilliam/COMP4537_Lab_0/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BetterLordWilliam/COMP4537_Lab_0.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "dependencies": {
+    "eslint": "^9.34.0",
+    "express": "^5.1.0",
+    "gitignore": "^0.7.0",
+    "nodemon": "^3.1.10"
+  }
+}
