@@ -1,4 +1,4 @@
-import { Position, RGBColor } from '/lab0/js/utils.js';
+import { Position, RGBColor } from '/lab0/js/Utils.js';
 
 export class RandomButton {
 
