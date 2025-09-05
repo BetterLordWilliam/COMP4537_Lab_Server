@@ -7,19 +7,39 @@ class IndexController {
         this.startGameForm = document.querySelector('#startGameForm');
         this.inputNumber = document.querySelector('#startGameInumber');
         this.startGameButton = document.querySelector('#startGame');
+        this.gameContainer = document.querySelector('#gameContainer');
 
         this.startGameForm.addEventListener('submit', (e) => this.startGame(e));
+    }
+
+    defaultState() {
+        console.log('Do something');
+    }
+
+    gameState() {
+        console.log('Do something');
+    }
+
+    gameFailed() {
+        delete this.game;
+        alert(messages.wrongOrder);
+        this.defaultState();
+    }
+
+    gameWon() {
+        delete this.game;
+        alert(messages.allMessagesSameOrder);
+        this.defaultState();
     }
 
     startGame(e) {
         e.preventDefault();
 
         console.log(this.inputNumber.value);
-        // Annoying
-        // alert(messages.test);
 
-        this.game = new Game();
-        this.game.startGame(this.inputNumber.value);
+        this.gameState();
+        this.game = new Game(this, this.inputNumber.value);
+        this.game.startGame();
     }
 }
 

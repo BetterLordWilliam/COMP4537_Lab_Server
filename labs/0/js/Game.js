@@ -6,10 +6,17 @@ const twoMS = 2000;
 
 export class Game {
 
-    constructor() {
+    constructor(uiController, numberOfButtons) {
+        this.uiController = uiController;
+        this.numberOfButtons = numberOfButtons;
         this.buttons = [];
+        this.cButton = 0;
         this.buttonContainer = document.querySelector('#gameArea');
         console.log(this.buttonContainer);
+    }
+
+    resetButtonCount() {
+        this.cButton = 0;
     }
 
     clearButtons() {
@@ -19,24 +26,37 @@ export class Game {
         delete this.buttons;
         this.buttons = [];
     }
+    
+    createGameButtons() {
+        // Create buttons for the game
+        for (let i = 0; i < this.numberOfButtons; i++) {
+            const randomColor = Utils.randomColor();
+            const button = new RandomButton(i, randomColor);
 
-    startListening() {
-        console.log('We will add event listeners to the buttons, they will return the order of button, we will check if it is correct');
-
-        for (const button of this.buttons) {
-            button.button.addEventListener('click', (e) => {
-                this.checkOrder(button.order);
-            });
+            this.buttons.push(button);
+            this.buttonContainer.appendChild(button.button);
         }
+
+        // Add the buttons to the container in order
+        for (const button of this.buttons) {
+            this.buttonContainer.appendChild(button.button);
+        }
+
+        console.log(this.buttons);
     }
 
-    checkOrder(buttonOrder) {
-        console.log(buttonOrder);
-
-        if (buttonOrder === this.cButton)
-            this.cButton++;
-        else
-            throw new Error('Wrong button order!');
+    startScrambling() {
+        // Start scrambling the buttons
+        setTimeout(
+            () => {
+                for (const button of this.buttons) {
+                    button.hideOrder();
+                    button.positionAbsolute();
+                }
+                this.scramble(this.numberOfButtons - 1)
+            },
+            this.numberOfButtons * oneMS
+        );
     }
 
     scramble(numberOfButtons) {
@@ -52,42 +72,60 @@ export class Game {
         }
 
         if (numberOfButtons > 0) {
-            setTimeout(() => this.scramble(--numberOfButtons), twoMS);
+            setTimeout(() => this.scramble(numberOfButtons - 1), twoMS);
         } else {
             console.log('Scrambling over...');
             return this.startListening();
         }
     }
-    
-    startGame(numberOfButtons) {
-        this.cButton = 0;
-        this.clearButtons();
 
-        // Create buttons for the game
-        for (let i = 0; i < numberOfButtons; i++) {
-            const randomColor = Utils.randomColor();
-            const button = new RandomButton(i, randomColor);
-
-            this.buttons.push(button);
-            this.buttonContainer.appendChild(button.button);
-        }
-
-        // Add the buttons to the container in order
+    startListening() {
         for (const button of this.buttons) {
-            this.buttonContainer.appendChild(button.button);
+            button.button.addEventListener('click', (e) => {
+                this.checkOrder(button, button.order);
+            });
         }
+    }
 
-        console.log(this.buttons);
+    stopListening() {
+        console.log('We are DONE listening now!! SO angy. 😡.');
+    }
 
-        setTimeout(
-            () => {
-                for (const button of this.buttons) {
-                    button.hideOrder();
-                    button.positionAbsolute();
-                }
-                this.scramble(--numberOfButtons)
-            },
-            numberOfButtons * oneMS
-        );
+    checkOrder(button, buttonOrder) {
+        console.log(buttonOrder);
+        console.log(this.cButton);
+        console.log(this.numberOfButtons);
+
+        if (buttonOrder === this.cButton) {
+            button.showOrder();
+            button.positionRelative();
+            button.setPosition(new Position(0, 0));
+
+            if (this.cButton === this.numberOfButtons - 1) {
+                this.endGame();
+                this.stopListening();
+                this.uiController.gameWon();
+            }
+
+            this.cButton++;
+
+        } else {
+            this.endGame();
+            this.stopListening();
+            this.uiController.gameFailed();
+        }
+    }
+
+    endGame() {
+        this.stopListening();
+        this.clearButtons();
+    }
+
+    startGame() {
+        this.uiController.gameState();
+        this.clearButtons();
+        this.resetButtonCount();
+        this.createGameButtons();
+        this.startScrambling();
     }
 }
