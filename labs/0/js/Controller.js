@@ -1,37 +1,62 @@
-import { messages } from '/lab0/lang/en/user.js';
+import { Messages } from '/lab0/lang/en/User.js';
 import { Game } from '/lab0/js/Game.js';
 
 class IndexController {
 
+    /**
+     * Constructs an instance of the IndexController object.
+     */
     constructor() {
         this.startGameForm = document.querySelector('#startGameForm');
         this.inputNumber = document.querySelector('#startGameInumber');
         this.startGameButton = document.querySelector('#startGame');
-        this.gameContainer = document.querySelector('#gameContainer');
+        this.defaultStateContainer = document.querySelector('#defaultState');
+        this.gameStateContainer = document.querySelector('#gameState');
 
         this.startGameForm.addEventListener('submit', (e) => this.startGame(e));
     }
 
+    /**
+     * Shows the UI default state.
+     */
     defaultState() {
         console.log('Do something');
+        this.defaultStateContainer.hidden = false;
+        this.gameStateContainer.hidden = true;
     }
 
+    /**
+     * Shows the UI game state.
+     */
     gameState() {
         console.log('Do something');
+        this.defaultStateContainer.hidden = true;
+        this.gameStateContainer.hidden = false;
     }
 
+    /**
+     * Handles game failure.
+     */
     gameFailed() {
         delete this.game;
-        alert(messages.wrongOrder);
+        alert(Messages.gameFail);
         this.defaultState();
     }
 
+    /**
+     * Handles game winning.
+     */
     gameWon() {
         delete this.game;
-        alert(messages.allMessagesSameOrder);
+        alert(Messages.gameWon);
         this.defaultState();
     }
 
+    /**
+     * Event handler for the start game event.
+     * 
+     * @param {Event} e 
+     */
     startGame(e) {
         e.preventDefault();
 
