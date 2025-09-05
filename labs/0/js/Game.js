@@ -83,8 +83,6 @@ export class Game {
      * @returns 
      */
     scramble(numberOfButtons) {
-        console.log('Scrambling...');
-
         for (const button of this.buttons) {
             const rpos = Utils.randomPosition(
                 button.button.style.width,
@@ -97,7 +95,6 @@ export class Game {
         if (numberOfButtons > 0) {
             setTimeout(() => this.scramble(numberOfButtons - 1), this.twoS);
         } else {
-            console.log('Scrambling over...');
             return this.startListening();
         }
     }

@@ -22,7 +22,6 @@ class IndexController {
      * Shows the UI default state.
      */
     defaultState() {
-        console.log('Do something');
         this.defaultStateContainer.hidden = false;
         this.gameStateContainer.hidden = true;
     }
@@ -31,7 +30,6 @@ class IndexController {
      * Shows the UI game state.
      */
     gameState() {
-        console.log('Do something');
         this.defaultStateContainer.hidden = true;
         this.gameStateContainer.hidden = false;
     }
