@@ -11,9 +11,10 @@ export class RandomButton {
     constructor(order, color) {
         const button = document.createElement('button');
 
-        this.order = order
+        this.order = order;
+        this.vorder = order + 1;
         this.button = button;
-        this.button.textContent = order.toString();
+        this.button.textContent = this.vorder.toString();
         this.button.id = `button${order}`;
         this.button.style.width = '10em';
         this.button.style.height = '5em';
@@ -31,7 +32,7 @@ export class RandomButton {
      * Hides the order of the button in the text content of the button.
      */
     showOrder() {
-        this.button.textContent = this.order.toString();
+        this.button.textContent = this.vorder.toString();
     }
 
     /**
