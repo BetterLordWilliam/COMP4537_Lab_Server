@@ -51,11 +51,6 @@ export class Game {
             this.buttonContainer.appendChild(button.button);
         }
 
-        // Add the buttons to the container in order
-        for (const button of this.buttons) {
-            this.buttonContainer.appendChild(button.button);
-        }
-
         console.log(this.buttons);
     }
 
