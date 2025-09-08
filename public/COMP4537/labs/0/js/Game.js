@@ -1,7 +1,10 @@
-import { Utils, Position } from '/lab0/js/Utils.js';
-import { RandomButton } from '/lab0/js/RandomButton.js';
+import RandomButton from './RandomButton.js';
+import Utils from './Utils.js';
 
-export class Game {
+export default class Game {
+
+    static oneS = 1000;
+    static twoS = 2000;
 
     /**
      * Initializes a Game object instance.
@@ -10,9 +13,6 @@ export class Game {
      * @param {Number} numberOfButtons the number of buttons that the game will have
      */
     constructor(uiController) {
-        this.oneS = 1000;
-        this.twoS = 2000;
-
         this.uiController = uiController;
         this.buttons = [];
         this.cButton = 0;
@@ -22,19 +22,13 @@ export class Game {
     }
 
     /**
-     * Resets the cButton counter variable.
-     */
-    resetButtonCount() {
-        this.cButton = 0;
-    }
-
-    /**
      * Removes buttons from gameStateContainer and deletes the array storing them.
      */
     clearButtons() {
         while (this.buttonContainer.firstChild) {
             this.buttonContainer.removeChild(this.buttonContainer.firstChild);
         }
+
         this.buttons = [];
     }
     
@@ -45,7 +39,7 @@ export class Game {
         // Create buttons for the game
         for (let i = 0; i < this.numberOfButtons; i++) {
             const randomColor = Utils.randomColor();
-            const button = new RandomButton(i, randomColor);
+            const button = new RandomButton(this, i, randomColor);
 
             this.buttons.push(button);
             this.buttonContainer.appendChild(button.button);
@@ -67,7 +61,7 @@ export class Game {
                 }
                 this.scramble(this.numberOfButtons - 1)
             },
-            this.numberOfButtons * this.oneS
+            this.numberOfButtons * Game.oneS
         );
     }
 
@@ -83,14 +77,14 @@ export class Game {
                 button.button.style.width,
                 button.button.style.height
             );
-
             button.setPosition(rpos);
         }
 
         if (numberOfButtons > 0) {
-            setTimeout(() => this.scramble(numberOfButtons - 1), this.twoS);
+            setTimeout(() => this.scramble(numberOfButtons - 1), Game.twoS);
+
         } else {
-            return this.startListening();
+            this.startListening();
         }
     }
 
@@ -99,22 +93,18 @@ export class Game {
      */
     startListening() {
         for (const button of this.buttons) {
-            button.button.addEventListener('click', (e) => {
-                this.checkOrder(button);
-            });
+            button.attachEventListener();
         }
     }
 
     /**
-     * Handles the button clicked event and checks the order.
+     * Validates that a button is in the correct order.
      * 
      * @param {RandomButton} button RandomButton instance that was clicked
      */
     checkOrder(button) {
         if (button.order === this.cButton) {
             button.showOrder();
-            // button.positionRelative();
-            // button.setPosition(new Position(0, 0));
 
             if (this.cButton === this.numberOfButtons - 1) {
                 this.clearButtons();
@@ -136,9 +126,9 @@ export class Game {
      */
     startGame(numberOfButtons) {
         this.numberOfButtons = numberOfButtons;
+        this.cButton = 0;
 
         this.clearButtons();
-        this.resetButtonCount();
         this.createGameButtons();
         this.startScrambling();
     }

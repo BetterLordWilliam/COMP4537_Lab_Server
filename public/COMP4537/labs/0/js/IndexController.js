@@ -1,5 +1,5 @@
-import { Messages } from '/lab0/lang/en/User.js';
-import { Game } from '/lab0/js/Game.js';
+import Messages from '../lang/en/User.js';
+import Game from './Game.js';
 
 class IndexController {
 
@@ -12,10 +12,9 @@ class IndexController {
         this.startGameButton = document.querySelector('#startGame');
         this.defaultStateContainer = document.querySelector('#defaultState');
         this.gameStateContainer = document.querySelector('#gameState');
-
+        this.startGameb = this.startGame.bind(this);
+        this.startGameForm.addEventListener('submit', this.startGameb);
         this.game = new Game(this);
-
-        this.startGameForm.addEventListener('submit', (e) => this.startGame(e));
     }
 
     /**
