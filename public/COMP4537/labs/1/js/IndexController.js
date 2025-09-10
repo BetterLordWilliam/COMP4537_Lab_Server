@@ -1,6 +1,6 @@
 class IndexController {
     constructor() {
-        console.log('Index controller lives');
+        console.log('Index lives.');
     }
 }
 
