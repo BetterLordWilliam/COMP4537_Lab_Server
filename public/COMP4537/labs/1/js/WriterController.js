@@ -1,12 +1,11 @@
 import User from '../lang/en/User.js';
 import Note from './Note.js';
-import Storage from './StorageService.js';
+import NoteController from './NoteController.js';
 
-class WriterController {
+class WriterController extends NoteController {
     constructor() {
-        console.log('Writer lives.');
+        super();
 
-        this.noteContainer = document.querySelector('#noteContainer');
         this.noteAddButton = document.querySelector('#noteAddButton');
         this.writeGoBack = document.querySelector('#goBack');
 
@@ -17,24 +16,7 @@ class WriterController {
 
         this.writeGoBack.textContent = User.BUTTON_GO_BACK;
 
-        this.clearNoteContainer();
-        this.appendNotes(Storage.getAllNotes());
-    }
-
-    clearNoteContainer() {
-        while(this.noteContainer.firstChild) {
-            this.noteContainer.removeChild(this.noteContainer.firstChild);
-        }
-    }
-
-    appendNotes(notes) {
-        try {
-            for (const note of notes) {
-                this.noteContainer.appendChild(note.container);
-            }
-        } catch (err) {
-            console.error(err);
-        }
+        this.reset();
     }
     
     handleNoteAdd() {

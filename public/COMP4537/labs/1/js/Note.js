@@ -9,6 +9,8 @@ export default class Note {
         this.textArea = document.createElement('textarea');
         this.removeButton = document.createElement('button');
 
+        console.log(this.id);
+
         this.handleButtonRemoveB = this.handleButtonRemove.bind(this);
         this.handleTextContentChangedB = this.handleTextContentChanged.bind(this);
 

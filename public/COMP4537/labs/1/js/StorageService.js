@@ -2,7 +2,8 @@ import Note from './Note.js'
 
 export default class StorageService {
     static id () {
-        return window.localStorage.length;
+        console.log(window.localStorage.length);
+        return window.localStorage.length + 1;
     }
 
     static getAllNotes() {

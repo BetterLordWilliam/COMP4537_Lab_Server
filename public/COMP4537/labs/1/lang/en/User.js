@@ -3,5 +3,6 @@ export default class User {
   static BUTTON_GO_BACK = '⬅️ Go back';
   static BUTTON_ADD_NOTE = 'Add Note';
   static BUTTON_REMOVE_NOTE = 'Remove Note';
+  static NOTE_LIST_UPDATED = 'Last updated at ';
 }
 
