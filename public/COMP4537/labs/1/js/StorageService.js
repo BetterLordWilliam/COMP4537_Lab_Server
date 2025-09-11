@@ -8,15 +8,10 @@ export default class StorageService {
             return 1;
         }
 
-        let highestKey = 0;
+        const parsedKeys = keys.map(e => parseInt(e) || 0);
+        const maxKey = Math.max(...parsedKeys);
 
-        for (const key of Object.keys(window.localStorage)) {
-            let nextKey = parseInt(key) || 0;
-            if (nextKey > highestKey)
-                highestKey = nextKey;
-        }
-
-        return highestKey + 1;
+        return maxKey + 1;
     }
 
     static getAllNotes() {
