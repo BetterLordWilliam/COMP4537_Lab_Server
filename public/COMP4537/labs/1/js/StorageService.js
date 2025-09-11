@@ -8,7 +8,13 @@ export default class StorageService {
             return 1;
         }
 
-        let highestKey = Math.max(...keys.map(key => parseInt(key) || 0));
+        let highestKey = 0;
+
+        for (const key of Object.keys(window.localStorage)) {
+            let nextKey = parseInt(key) || 0;
+            if (nextKey > highestKey)
+                highestKey = nextKey;
+        }
 
         return highestKey + 1;
     }
