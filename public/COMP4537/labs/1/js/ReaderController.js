@@ -1,5 +1,6 @@
 import User from '../lang/en/User.js';
 import NoteController from './NoteController.js';
+import NoteItemControllerReadonly from './NoteItemControllerReadonly.js';
 
 class ReaderController extends NoteController {
     constructor() {
@@ -15,6 +16,17 @@ class ReaderController extends NoteController {
         window.addEventListener('storage', this.handleWindowStorageB);
 
         this.reset();
+    }
+
+    appendNotes(notes) {
+        try {
+            for (const note of notes) {
+                const noteController = new NoteItemControllerReadonly(note);
+                this.noteContainer.appendChild(noteController.container);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     handleWindowStorage() {

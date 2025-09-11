@@ -1,4 +1,5 @@
 import StorageService from './StorageService.js';
+import NoteItemController from './NoteItemController.js';
 
 export default class NoteController {
     constructor () {
@@ -19,7 +20,8 @@ export default class NoteController {
     appendNotes(notes) {
         try {
             for (const note of notes) {
-                this.noteContainer.appendChild(note.container);
+                const noteController = new NoteItemController(note);
+                this.noteContainer.appendChild(noteController.container);
             }
         } catch (err) {
             console.error(err);

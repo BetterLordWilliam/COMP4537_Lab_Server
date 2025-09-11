@@ -2,8 +2,15 @@ import Note from './Note.js'
 
 export default class StorageService {
     static id () {
-        console.log(window.localStorage.length);
-        return window.localStorage.length + 1;
+        const keys = Object.keys(window.localStorage);
+
+        if (keys.length === 0) {
+            return 1;
+        }
+
+        let highestKey = Math.max(...keys.map(key => parseInt(key) || 0));
+
+        return highestKey + 1;
     }
 
     static getAllNotes() {

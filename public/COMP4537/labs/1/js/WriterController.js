@@ -1,6 +1,6 @@
 import User from '../lang/en/User.js';
-import Note from './Note.js';
 import NoteController from './NoteController.js';
+import NoteItemController from './NoteItemController.js';
 
 class WriterController extends NoteController {
     constructor() {
@@ -20,7 +20,7 @@ class WriterController extends NoteController {
     }
     
     handleNoteAdd() {
-        const newNote = new Note();
+        const newNote = new NoteItemController();
         this.noteContainer.appendChild(newNote.container);
     }
 }
