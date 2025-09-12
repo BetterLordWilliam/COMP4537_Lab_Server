@@ -20,12 +20,12 @@ export default class NoteController {
      * Resets the container.
      */
     reset() {
-        this.listUpdated.textContent = ''
-            .concat(User.NOTE_LIST_UPDATED)
-            .concat(new Date().toLocaleString());
-
         this.clearNotes();
         this.appendNotes(StorageService.getAllNotes());
+
+        this.listUpdated.textContent = ''
+            .concat(User.NOTE_LIST_UPDATED)
+            .concat(StorageService.getUpdateTime());
     }
 
     /**

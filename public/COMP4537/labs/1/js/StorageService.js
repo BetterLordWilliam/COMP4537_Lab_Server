@@ -1,23 +1,9 @@
 import Note from './Note.js'
 
 export default class StorageService {
-    /**
-     * Determines the largest ID number in local storage and returns one greater.
-     * 
-     * @returns id Number that is greater than the current largest ID number
-     */
-    static id () {
-        const keys = Object.keys(window.localStorage);
 
-        if (keys.length === 0) {
-            return 1;
-        }
-
-        const parsedKeys = keys.map(e => parseInt(e) || 0);
-        const maxKey = Math.max(...parsedKeys);
-
-        return maxKey + 1;
-    }
+    static UPDATED = 'updated';
+    static NOTES = 'notes';
 
     /**
      * Returns an array of Note objects representing the data in local storage.
@@ -25,11 +11,10 @@ export default class StorageService {
      * @returns an array of Note objects representing the data in local storage
      */
     static getAllNotes() {
-        const notes = Object
-            .entries(window.localStorage)
-            .map(([key, value]) => new Note(key, value));
+        const notes = JSON.parse(window.localStorage.getItem(StorageService.NOTES)) || [];
+        const deserialized = notes.map(noteJSON => Note.fromJSON(noteJSON));
 
-        return notes;
+        return deserialized;
     }
 
     /**
@@ -38,7 +23,15 @@ export default class StorageService {
      * @param {Note} note Object instance which should be removed from local storage
      */
     static removeNote(note) {
-        window.localStorage.removeItem(note.id);
+        const notes = this.getAllNotes();
+        const remove = notes.findIndex(obj => obj.content === note.content);
+
+        if (remove !== -1) {
+            notes.splice(remove, 1);
+        }
+
+        window.localStorage.setItem(StorageService.NOTES, JSON.stringify(notes));
+        window.localStorage.setItem(StorageService.UPDATED, new Date().toLocaleString());
     }
 
     /**
@@ -47,6 +40,20 @@ export default class StorageService {
      * @param {Note} note Note object instance to add to local storage 
      */
     static addNote(note) {
-        window.localStorage.setItem(note.id, note.content);
+        const notes = this.getAllNotes();
+
+        notes.push(note);
+
+        window.localStorage.setItem(StorageService.NOTES, JSON.stringify(notes));
+        window.localStorage.setItem(StorageService.UPDATED, new Date().toLocaleString());
+    }
+
+    /**
+     * Returns string of when local storage was last updated.
+     * 
+     * @returns time locale string of when local storage was last updated.
+     */
+    static getUpdateTime() {
+        return window.localStorage.getItem(StorageService.UPDATED) || null;
     }
 }
