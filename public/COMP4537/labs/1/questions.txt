@@ -1,0 +1,9 @@
+1. open the writer.html and reader.html in two different tabs of same browser. Would the reader.html have access to the content stored in the local storage by the writer.html?
+
+    Yes, the two windows of the website in the same browser reflect the changes in local storage. This is because local storage object is defined per the website root.
+    Since the lab pages are from the same root website (and given they are open in the same browser program), they share local storage.
+
+2. open the writer.html and reader.html in two different tabs of two different browsers ( e.g. one in chrome, one in Firefox) . Would the reader.html have access to the content stored in the local storage by the writer.html?
+
+    No, local storage objects are persisted by the specific browser (firefox, chrome) so changes on the same root website will not be reflected across different browsers.
+    
