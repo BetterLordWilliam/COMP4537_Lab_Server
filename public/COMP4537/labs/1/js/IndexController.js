@@ -1,6 +1,10 @@
 import User from '../lang/en/User.js';
 
 class IndexController {
+    
+    /**
+     * Initializes an instance of the Index Item controller.
+     */
     constructor() {
         this.pageTitle = document.querySelector('#pageTitle');
         this.pageDesc = document.querySelector('#pageDesc');

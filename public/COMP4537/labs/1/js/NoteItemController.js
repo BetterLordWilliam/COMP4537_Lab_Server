@@ -3,6 +3,12 @@ import StorageService from "./StorageService.js";
 import Note from './Note.js';
 
 export default class NoteItemController {
+
+    /**
+     * Controls the view for a Note object instance. Mutable version.
+     * 
+     * @param {Note} note Note object instance
+     */
     constructor(note = null) {
         this.note = note || new Note(StorageService.id(), '');
 
@@ -24,12 +30,18 @@ export default class NoteItemController {
         this.removeButton.addEventListener('click', this.handleButtonRemoveB);
     }
 
+    /**
+     * Dispatches the notes updated event, so that parent document can trigger reset.
+     */
     dispatchNoteUpdate() {
         const noteUpdated = new Event('notesUpdated');
 
         document.dispatchEvent(noteUpdated);
     }
 
+    /**
+     * Event handler for the remove note button.
+     */
     handleButtonRemove() {
         StorageService.removeNote(this.note);
 
@@ -38,6 +50,9 @@ export default class NoteItemController {
         this.dispatchNoteUpdate();
     }    
 
+    /**
+     * Event handler for the add note button.
+     */
     handleTextContentChanged() {
         this.note.content = this.textArea.value;
 

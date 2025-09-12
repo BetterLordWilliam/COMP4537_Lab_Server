@@ -3,6 +3,10 @@ import NoteController from './NoteController.js';
 import NoteItemControllerReadonly from './NoteItemControllerReadonly.js';
 
 class ReaderController extends NoteController {
+
+    /**
+     * Constructs a ReaderController instance of the NoteController class.
+     */
     constructor() {
         super();
 
@@ -17,6 +21,11 @@ class ReaderController extends NoteController {
         this.reset();
     }
 
+    /**
+     * Adds notes to the container element attaching controllers. Override to attach readonly controllers.
+     * 
+     * @param {Array<Note>} notes Array of Note objects
+     */
     appendNotes(notes) {
         try {
             for (const note of notes) {
@@ -28,6 +37,9 @@ class ReaderController extends NoteController {
         }
     }
 
+    /**
+     * Event handler for the window storage event (triggered when another window of same origin update localStorage).
+     */
     handleStorageUpdated() {
         this.reset();
     }

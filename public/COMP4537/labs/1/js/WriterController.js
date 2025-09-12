@@ -3,6 +3,10 @@ import NoteController from './NoteController.js';
 import NoteItemController from './NoteItemController.js';
 
 class WriterController extends NoteController {
+
+    /**
+     * Initializes a new instance of the WriterController subclass of NoteController.
+     */
     constructor() {
         super();
 
@@ -28,12 +32,20 @@ class WriterController extends NoteController {
         this.reset();
     }
     
+    /**
+     * Handles the note add button. Creates a NoteItemController (mutable).
+     */
     handleNoteAdd() {
         const newNote = new NoteItemController();
 
         this.noteContainer.appendChild(newNote.container);
     }
 
+    /**
+     * Event handler for the notesUpdated event,
+     * triggered when a mutable note controller removed button is pressed
+     * or when the user finishes modifying the textArea element.
+     */
     handleNoteUpdated() {
         this.reset();
     }

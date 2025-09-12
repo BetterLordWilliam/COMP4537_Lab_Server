@@ -3,6 +3,12 @@ import StorageService from './StorageService.js';
 import NoteItemController from './NoteItemController.js';
 
 export default class NoteController {
+
+    /**
+     * Initializes a NoteController instance.
+     * 
+     * Root class of WriterController and ReaderController, common note list management functions.
+     */
     constructor () {
         this.pageHeader = document.querySelector('#pageHeader');
         this.pageDescription = document.querySelector('#pageDesc');
@@ -10,6 +16,9 @@ export default class NoteController {
         this.listUpdated = document.querySelector('#listUpdated');
     }
 
+    /**
+     * Resets the container.
+     */
     reset() {
         this.listUpdated.textContent = ''
             .concat(User.NOTE_LIST_UPDATED)
@@ -19,12 +28,20 @@ export default class NoteController {
         this.appendNotes(StorageService.getAllNotes());
     }
 
+    /**
+     * Removes all note from the container.
+     */
     clearNotes() {
         while(this.noteContainer.firstChild) {
             this.noteContainer.removeChild(this.noteContainer.firstChild);
         }
     }
 
+    /**
+     * Adds Note objects to the page with mutable NoteItemController.
+     * 
+     * @param {Array<Note>} notes Array of Note objects
+     */
     appendNotes(notes) {
         try {
             for (const note of notes) {
