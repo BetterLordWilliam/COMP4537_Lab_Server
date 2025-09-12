@@ -24,13 +24,25 @@ export default class NoteItemController {
         this.removeButton.addEventListener('click', this.handleButtonRemoveB);
     }
 
+    dispatchNoteUpdate() {
+        const noteUpdated = new Event('notesUpdated');
+
+        document.dispatchEvent(noteUpdated);
+    }
+
     handleButtonRemove() {
-        StorageService.removeNote(this.note.id);
+        StorageService.removeNote(this.note);
+
         this.container.remove();
+
+        this.dispatchNoteUpdate();
     }    
 
     handleTextContentChanged() {
         this.note.content = this.textArea.value;
-        StorageService.addNote(this.note.id, this.note.content);
+
+        StorageService.addNote(this.note);
+
+        this.dispatchNoteUpdate();
     }
 }

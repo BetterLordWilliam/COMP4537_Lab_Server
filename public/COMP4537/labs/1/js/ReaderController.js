@@ -6,14 +6,12 @@ class ReaderController extends NoteController {
     constructor() {
         super();
 
-        this.listUpdated = document.querySelector('#listUpdated');
-        this.noteContainer = document.querySelector('#noteContainer');
+        this.handleStorageUpdatedB = this.handleStorageUpdated.bind(this);
 
-        this.handleWindowStorageB = this.handleWindowStorage.bind(this);
-        
-        // Can just use an event listener for when the window storage object is modified
-        // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
-        window.addEventListener('storage', this.handleWindowStorageB);
+        this.pageHeader.textContent = User.HEADER_READ_PAGE;
+        this.pageDescription.textContent = User.P_READ_PAGE_DESC;
+
+        window.addEventListener('storage', this.handleNotesUpdatedB);
 
         this.reset();
     }
@@ -29,13 +27,7 @@ class ReaderController extends NoteController {
         }
     }
 
-    handleWindowStorage() {
-        console.log('Storage updated');
-
-        this.listUpdated.textContent = ''
-            .concat(User.NOTE_LIST_UPDATED)
-            .concat(new Date().toLocaleString());
-
+    handleStorageUpdated() {
         this.reset();
     }
 }

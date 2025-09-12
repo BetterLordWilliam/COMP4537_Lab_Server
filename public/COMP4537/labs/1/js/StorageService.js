@@ -28,11 +28,11 @@ export default class StorageService {
         return notes;
     }
 
-    static removeNote(noteId) {
-        window.localStorage.removeItem(noteId);
+    static removeNote(note) {
+        window.localStorage.removeItem(note.id);
     }
 
-    static addNote(noteId, noteString) {
-        window.localStorage.setItem(noteId, noteString);
+    static addNote(note) {
+        window.localStorage.setItem(note.id, note.content);
     }
 }
