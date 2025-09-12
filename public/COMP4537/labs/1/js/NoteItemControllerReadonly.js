@@ -9,7 +9,7 @@ export default class NoteItemController {
      * @param {Note} note Note object instance that should be bound to the item controller
      */
     constructor(note = null) {
-        this.note = note || new Note('');
+        this.note = note || new Note(StorageService.id(), '');
 
         this.container = document.createElement('div');
         this.textArea = document.createElement('textarea');

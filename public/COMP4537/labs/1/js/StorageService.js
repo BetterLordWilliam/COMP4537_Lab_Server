@@ -24,10 +24,10 @@ export default class StorageService {
      */
     static removeNote(note) {
         const notes = this.getAllNotes();
-        const remove = notes.findIndex(obj => obj.content === note.content);
+        const removeIdx = notes.findIndex(obj => obj.content === note.content);
 
-        if (remove !== -1) {
-            notes.splice(remove, 1);
+        if (removeIdx !== -1) {
+            notes.splice(removeIdx, 1);
         }
 
         window.localStorage.setItem(StorageService.NOTES, JSON.stringify(notes));
@@ -41,8 +41,13 @@ export default class StorageService {
      */
     static addNote(note) {
         const notes = this.getAllNotes();
+        const noteIdx = notes.findIndex(obj => obj.id === note.id);
 
-        notes.push(note);
+        if (noteIdx !== -1) {
+            notes[noteIdx] = note;
+        } else {
+            notes.push(note);
+        }
 
         window.localStorage.setItem(StorageService.NOTES, JSON.stringify(notes));
         window.localStorage.setItem(StorageService.UPDATED, new Date().toLocaleString());
@@ -55,5 +60,21 @@ export default class StorageService {
      */
     static getUpdateTime() {
         return window.localStorage.getItem(StorageService.UPDATED) || null;
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    static id() {
+        const notes = this.getAllNotes();
+        const noteIds = notes.map(note => parseInt(note.id) || 0);
+        const maxId = (noteIds.length !== 0)
+            ? Math.max(...noteIds)
+            : 0;
+
+        console.log(maxId);
+
+        return maxId + 1;
     }
 }

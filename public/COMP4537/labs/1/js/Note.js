@@ -3,9 +3,11 @@ export default class Note {
     /**
      * Initializes a Note object.
      * 
+     * @param {Number} id unique id number of the note
      * @param {String} content text of the note
      */
-    constructor(content) {
+    constructor(id, content) {
+        this.id = id;
         this.content = content;
     }
 
@@ -17,6 +19,7 @@ export default class Note {
      */
     static fromJSON(json) {
         return new Note(
+            json.id,
             json.content
         );
     }
