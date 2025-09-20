@@ -1,3 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" />
+    <title>Netflix Microservices Architecture</title>
+</head>
+<body>
 <h1 id="netflix-monolithic-to-microservices">Netflix Monolithic to Microservices</h1>
 <h2 id="will-otterbein-comp4537">Will Otterbein, COMP4537</h2>
 <p>Netflix's early architecture was a single, monolithic application. While simple to start, this design made it difficult to scale and update as the company grew. Every change required modifying the entire system, a process that became slow and complicated. To solve this, Netflix began transitioning to an AWS (Amazon Web Services) powered <strong>microservices architecture</strong> in 2008. This move allowed them to achieve the massive scalability, reliability, and speed they needed to become the streaming giant we know today.</p>
@@ -18,6 +27,7 @@
 </ul>
 <p>Netflix services are responsible for their own domain of data and therefore have their own databases. This is known as the <strong>database-per-service</strong> pattern. This ensures that Netflix microservices can function independently. Netflix enforces data consistency by syncing data between services over time.</p>
 <p>Netflix uses 700 microservices btw…</p>
+<span><strong>Fun Fact</strong> Netflix was one of the earliest adopters of the microservices architecture in the cloud, and remains to the current year 2025 AD the largest AWS cloud customer.</span>
 <h1 id="pros-and-cons-of-microservices">Pros and Cons of Microservices</h1>
 <p>This section explores some of the pros and the cons of microservice architectural patterns.</p>
 <table>
@@ -56,3 +66,5 @@
 [4]<br />
 <a href="https://www.youtube.com/shorts/V4vU6qDRe1U">https://www.youtube.com/shorts/V4vU6qDRe1U</a></p>
 
+</body>
+</html>
