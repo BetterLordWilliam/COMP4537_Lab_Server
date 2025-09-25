@@ -1,13 +1,21 @@
 import fs from 'fs';
 
-export function readDataFileContents() {
-    return fs.promises.readFile('../../data/file.txt', {
+const dataDir   = './data';
+const file      = 'file.txt';
+
+const fileInDataDir = (fileName) => {
+    return `${dataDir}/${fileName}`;
+}
+
+
+export function readDataFileContents(fileName) {
+    return fs.promises.readFile(fileInDataDir(fileName), {
         encoding: 'utf8'
     });
 }
 
 export function appendDataFileContents(text) {
-    return fs.promises.appendFile('../../data/file.txt', `\n${text}`, {
+    return fs.promises.appendFile(fileInDataDir(file), `\n${text}`, {
         encoding: 'utf8'
     });
 }

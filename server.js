@@ -87,8 +87,8 @@ function handleApi(req, res) {
 
         // Loop through all the applications endpoints and see if it matches the requests endpoint
         for (let endpoint of endpoints) {
-            console.log(`Test agaisnt endpoint: ${endpoint.endpoint}`);
-            console.log(`Incomming request: ${reqEndpoint}`);
+            // console.log(`Test agaisnt endpoint: ${endpoint.endpoint}`);
+            // console.log(`Incomming request: ${reqEndpoint}`);
 
             match = reqEndpoint.match(endpoint.regExp);
 
