@@ -1,4 +1,5 @@
 import { getDate } from './utils.js';
+import { readDataFileContents, appendDataFileContents } from './services/fileReaderWriter.js';
 
 /**
  * API Endpoint library. I don't know if this is a term that is used.
@@ -62,9 +63,9 @@ class Lab3GetDateEndpoint extends ApiEndpoint{
                 date: `Hello ${query.get('name')}, the (server) date today is ${getDate()}.`
             }));
         } else {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
-                status: 404,
+                status: 400,
                 request: req.url,
                 error: 'name parameter is required'
             }));
@@ -76,11 +77,69 @@ class Lab3WriteFileEndpoint extends ApiEndpoint {
     constructor() {
         super('/COMP4537/api/labs/3/writeFile', 'GET');
     }
+
+    handle (req, res) {
+        let reqTup  = req.url.split('?');
+        let query   = new URLSearchParams(reqTup[1]);
+
+        if (!query.get('text')) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                status: 400,
+                request: req.url,
+                error: 'text parameter is required'
+            }));
+
+            return;
+        }
+
+        const promise = appendDataFileContents(query.get('text'));
+
+        promise
+            .then((message) => {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    status: 200,
+                    request: req.url,
+                    message: message
+                }));
+            })
+            .catch((error) => {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    status: 500,
+                    request: req.url,
+                    error: `The server failed to process the request. ${error.message}`
+                }));
+            });
+    }
 }
 
 class Lab3ReadFileEndpoint extends ApiEndpoint {
     constructor() {
         super('/COMP4537/api/labs/3/readFile', 'GET');
+    }
+
+    handle (req, res) {
+        const promise = readDataFileContents();
+
+        promise
+            .then((message) => {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    status: 200,
+                    request: req.url,
+                    message: message
+                }));
+            })
+            .catch((error) => {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    status: 500,
+                    request: req.url,
+                    error: `The server failed to process the request. ${error.message}`
+                }));
+            });
     }
 }
 
