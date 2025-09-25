@@ -2,6 +2,15 @@ import { getDate } from './utils.js';
 import { readDataFileContents, appendDataFileContents } from './services/fileReaderWriter.js';
 
 /**
+ * TODO:
+ * - apiSuccess helper
+ * - apiError helper
+ * - apiNotFound helper
+ * - apiBadRequest helper
+ * - apiTemplatedEndpoint helper (path parameters)
+ */
+
+/**
  * API Endpoint library. I don't know if this is a term that is used.
  * a
  */
