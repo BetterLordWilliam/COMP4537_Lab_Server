@@ -1,3 +1,3 @@
 export function getDate() {
-    return new Date().toLocaleString();
+    return new Date();
 }

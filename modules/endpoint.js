@@ -75,12 +75,8 @@ class Lab3GetDateEndpoint extends ApiEndpoint{
             return;
         }
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            status: 200,
-            request: req.url,
-            date: `Hello ${query.get('name')}, the (server) date today is ${getDate()}.`
-        }));
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end( `<p style="color: blue">Hello ${query.get('name')}, the (server) date today is ${getDate()}.</p>`);
     }
 }
 
