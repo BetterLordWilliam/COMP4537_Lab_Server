@@ -1,6 +1,6 @@
 import { getDate } from './utils.js';
 import { readDataFileContents, appendDataFileContents } from './services/fileReaderWriter.js';
-import User from './lang/en/User.js';
+import ServerStrings from './lang/en/ServerStrings.js';
 
 /**
  * TODO:
@@ -77,7 +77,7 @@ class Lab3GetDateEndpoint extends ApiEndpoint{
         }
 
         res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end( `<p style="color: blue">${User.getDateResponse(query.get('name'), getDate())}</p>`);
+        res.end( `<p style="color: blue">${ServerStrings.getDateResponse(query.get('name'), getDate())}</p>`);
     }
 }
 
