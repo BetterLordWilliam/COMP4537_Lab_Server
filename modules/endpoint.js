@@ -130,10 +130,11 @@ class Lab3ReadFileEndpoint extends ApiEndpoint {
 
     handle (req, res) {
 
-        console.log(req.url);
-        console.log(req.url.split('/').at(-1));
+        let fileName = req.url.split('/').at(-1);
 
-        if (!req.url.split('/').at(-1).endsWith('.txt')) {
+        console.log(fileName);
+
+        if (!fileName.endsWith('.txt')) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 status: 400,
@@ -144,7 +145,7 @@ class Lab3ReadFileEndpoint extends ApiEndpoint {
             return;
         }
 
-        const promise = readDataFileContents(req.url.split('/').at(-1));
+        const promise = readDataFileContents(fileName);
 
         promise
             .then((message) => {
@@ -160,7 +161,7 @@ class Lab3ReadFileEndpoint extends ApiEndpoint {
                 res.end(JSON.stringify({
                     status: 500,
                     request: req.url,
-                    error: `The server failed to process the request.`
+                    error: `The server failed to process the request. User says file ${fileName}, but the server could find no such file.`
                 }));
             });
     }
