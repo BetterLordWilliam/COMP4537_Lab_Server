@@ -1,5 +1,5 @@
 import ApiEndpoint from "../endpoint.js";
-import { definitions } from "./definitions.js";
+import { requestCount, definitions } from "./definitions.js";
 
 export default class GetDefinition extends ApiEndpoint {
     constructor () {
@@ -14,6 +14,8 @@ export default class GetDefinition extends ApiEndpoint {
         let word;
 
         try {
+            requestCount.count += 1;
+
             reqTuple        = req.url.split('?');
             urlQueryString  = new URLSearchParams(reqTuple[1]);
             hasWord         = urlQueryString.has('word');
@@ -22,6 +24,7 @@ export default class GetDefinition extends ApiEndpoint {
             if (!hasWord) {
                 return this.writeBadRequest(res, {
                     request: req.url,
+                    numberOfRequests: requestCount.count,
                     message: `URL search parameter 'word' required.`
                 });
             }
@@ -33,6 +36,7 @@ export default class GetDefinition extends ApiEndpoint {
             if (definition === undefined) {
                 return this.writeBadRequest(res, {
                     request: req.url,
+                    numberOfRequests: requestCount.count,
                     message: `No definition found for word '${word}'.`
                 });
             }
@@ -41,6 +45,7 @@ export default class GetDefinition extends ApiEndpoint {
                 request: req.url,
                 word: word,
                 definition: definition,
+                numberOfRequests: requestCount.count,
                 message: 'Successfully found word definition.'
             });
 
@@ -48,6 +53,7 @@ export default class GetDefinition extends ApiEndpoint {
             return this.writeServerFail(res, {
                 request: req.url,
                 error: error,
+                numberOfRequests: requestCount.count,
                 message: 'The server failed to process the request.'
             });
         }

@@ -1,5 +1,6 @@
+import { request } from "express";
 import ApiEndpoint from "../endpoint.js";
-import { definitions } from "./definitions.js";
+import { requestCount, definitions } from "./definitions.js";
 
 export default class PostDefinition extends ApiEndpoint {
     constructor() {
@@ -19,6 +20,8 @@ export default class PostDefinition extends ApiEndpoint {
 
         req.on('end', () => {
             try {
+                requestCount.count += 1;
+
                 // ensures that all the raw binary data is joined together correctly
                 parsedBody = JSON.parse(Buffer.concat(body).toString());
 
@@ -28,6 +31,7 @@ export default class PostDefinition extends ApiEndpoint {
                 if (parsedBody.word === undefined || parsedBody.definition === undefined) {
                     return this.writeBadRequest(res, {
                         request: req.url,
+                        numberOfRequests: requestCount.count,
                         error: `body parameter(s) 'word' and 'definition' are required.`
                     });
                 }
@@ -37,6 +41,7 @@ export default class PostDefinition extends ApiEndpoint {
                     return this.writeBadRequest(res, {
                         request: req.url,
                         word: parsedBody.word,
+                        numberOfRequests: requestCount.count,
                         message: `Warning, there is already a definition for word '${parsedBody.word}'.`
                     });
                 }
@@ -45,7 +50,7 @@ export default class PostDefinition extends ApiEndpoint {
 
                 return this.writeSuccess(res, {
                     request: req.url,
-                    numberOfRequests: ++this.reqCount,
+                    numberOfRequests: requestCount.count,
                     numberOfEntries: Object.entries(definitions).length,
                     message: `Word '${parsedBody.word}' now has definition '${parsedBody.definition}'`
                 });
@@ -54,6 +59,7 @@ export default class PostDefinition extends ApiEndpoint {
                 this.writeServerFail(res, {
                     request: req.url,
                     error: error,
+                    numberOfRequests: requestCount.count,
                     message: 'Server failed to process the request.'
                 });
             }
