@@ -10,7 +10,6 @@ export default class PostDefinition extends ApiEndpoint {
     handle(req, res) {
         let body;
         let parsedBody;
-        let word;
 
         body = [];
 
@@ -25,21 +24,23 @@ export default class PostDefinition extends ApiEndpoint {
 
                 console.log(parsedBody);
 
+                // Invalid request, requestor did not give a word or a definition (very bad)
                 if (parsedBody.word === undefined || parsedBody.definition === undefined) {
                     return this.writeBadRequest(res, {
                         request: req.url,
                         error: `body parameter(s) 'word' and 'definition' are required.`
                     });
                 }
-
+                
+                // Invalid request, the word already has a definition
                 if (definitions[parsedBody.word] !== undefined) {
                     return this.writeBadRequest(res, {
                         request: req.url,
                         word: parsedBody.word,
-                        error: `Warning, there is already a definition for word '${parsedBody.word}'.`
-                    })
+                        message: `Warning, there is already a definition for word '${parsedBody.word}'.`
+                    });
                 }
-                
+
                 definitions[parsedBody.word] = parsedBody.definition;
 
                 return this.writeSuccess(res, {
@@ -52,7 +53,8 @@ export default class PostDefinition extends ApiEndpoint {
             } catch (error) {
                 this.writeServerFail(res, {
                     request: req.url,
-                    error: error
+                    error: error,
+                    message: 'Server failed to process the request.'
                 });
             }
         });

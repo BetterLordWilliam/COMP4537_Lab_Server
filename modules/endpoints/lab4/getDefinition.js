@@ -3,32 +3,52 @@ import { definitions } from "./definitions.js";
 
 export default class GetDefinition extends ApiEndpoint {
     constructor () {
-        super('/COMP4537/api/labs/4/definitions/', 'GET');
+        super('/COMP4537/api/labs/4/definitions', 'GET');
     }
 
     handle (req, res) {
-        let word;
+        let reqTuple;
+        let urlQueryString;
         let definition;
-
-        word = req.url.split('/').at(-1);
+        let hasWord;
+        let word;
 
         try {
-            definition = definitions[word];
+            reqTuple        = req.url.split('?');
+            urlQueryString  = new URLSearchParams(reqTuple[1]);
+            hasWord         = urlQueryString.has('word');
+            
+            // User did not send a URL search parameter word
+            if (!hasWord) {
+                return this.writeBadRequest(res, {
+                    request: req.url,
+                    message: `URL search parameter 'word' required.`
+                });
+            }
+            
+            word        = urlQueryString.get('word');
+            definition  = definitions[word];
 
-            if (definition === undefined)
-                throw new Error('No definition.');
-
-            console.log(definition);
+            // There is no definition for the word the user requested
+            if (definition === undefined) {
+                return this.writeBadRequest(res, {
+                    request: req.url,
+                    message: `No definition found for word '${word}'.`
+                });
+            }
 
             return this.writeSuccess(res, {
                 request: req.url,
                 word: word,
-                definition: definition
+                definition: definition,
+                message: 'Successfully found word definition.'
             });
+
         } catch (error) {
             return this.writeServerFail(res, {
                 request: req.url,
-                message: `No definition found for word '${word}'.`
+                error: error,
+                message: 'The server failed to process the request.'
             });
         }
     }
