@@ -2,6 +2,9 @@ import Lab3GetDateEndpoint      from './endpoints/lab3/getDateEndpoint.js';
 import Lab3ReadFileEndpoint     from './endpoints/lab3/fileReadEndpoint.js';
 import Lab3WriteFileEndpoint    from './endpoints/lab3/fileWriteEndpoint.js';
 
+import GetDefinition            from './endpoints/lab4/getDefinition.js';
+import PostDefinition from './endpoints/lab4/postDefinition.js';
+
 /**
  * TODO:
  * - apiSuccess helper
@@ -47,4 +50,6 @@ class ApiLibrary {
 export const API_LIBRARY = new ApiLibrary()
     .addEndpoint(new Lab3GetDateEndpoint())
     .addEndpoint(new Lab3WriteFileEndpoint())
-    .addEndpoint(new Lab3ReadFileEndpoint());
+    .addEndpoint(new Lab3ReadFileEndpoint())
+    .addEndpoint(new GetDefinition())
+    .addEndpoint(new PostDefinition());
