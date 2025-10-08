@@ -24,7 +24,7 @@ export default class Lab3ReadFileEndpoint extends ApiEndpoint {
                 });
             })
             .catch((error) => {
-                return this.writeServerError(res, {
+                return this.writeServerFail(res, {
                     request: req.url,
                     error: `The server failed to process the request. User says file ${fileName}, but the server could find no such file.`
                 });
