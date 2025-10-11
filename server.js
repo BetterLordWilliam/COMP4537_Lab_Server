@@ -112,7 +112,7 @@ class Server {
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
         // Just send the CORS headers
-        if (res.method === 'OPTIONS') {
+        if (req.method === 'OPTIONS') {
             res.writeHead(200);
             res.end();
             return;
