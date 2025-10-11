@@ -12,7 +12,6 @@ export default class ApiEndpoint {
     writeSuccess(res, data) {
         res.writeHead(200, {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://blindy.net'
         })
         res.end(JSON.stringify(data));
     }
@@ -20,7 +19,6 @@ export default class ApiEndpoint {
     writeServerFail(res, data) {
         res.writeHead(500, {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://blindy.net'
         });
         res.end(JSON.stringify(data));
     }
@@ -28,7 +26,6 @@ export default class ApiEndpoint {
     writeBadRequest(res, data) {
         res.writeHead(400, {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://blindy.net'
         });
         res.end(JSON.stringify(data));
     }

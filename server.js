@@ -107,6 +107,17 @@ class Server {
     const server = http.createServer((req, res) => {
         console.log(`request for ${req.url} received.`);
 
+        res.setHeader('Access-Control-Allow-Origin', 'https://blindy.net');
+        res.setHeader('Access-Control-Allow-Method', 'GET, PUT, POST, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+        // Just send the CORS headers
+        if (res.method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+
         if (req.url.match(this.apiEndpoint)) {
             // console.log('This is an API request');
             this.handleApi(req, res)
