@@ -109,7 +109,7 @@ class Server {
 
         res.setHeader('Access-Control-Allow-Origin', 'https://blindy.net');
         res.setHeader('Access-Control-Allow-Method', 'GET, PUT, POST, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
 
         // Just send the CORS headers
         if (req.method === 'OPTIONS') {
