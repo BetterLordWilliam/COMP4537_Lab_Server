@@ -1,17 +1,18 @@
 // import express from 'express';
 import http from 'http';
-import fs from 'fs';
+import fs   from 'fs';
 import path from 'path';
 
 import DatabaseService from './modules/services/databaseService.js';
 
+import ApiLibrary               from './modules/endpoints.js';
 import Lab3GetDateEndpoint      from './modules/endpoints/lab3/getDateEndpoint.js';
 import Lab3ReadFileEndpoint     from './modules/endpoints/lab3/fileReadEndpoint.js';
 import Lab3WriteFileEndpoint    from './modules/endpoints/lab3/fileWriteEndpoint.js';
 import GetDefinition            from './modules/endpoints/lab4/getDefinition.js';
 import PostDefinition           from './modules/endpoints/lab4/postDefinition.js';
+import GetAllPatients           from './modules/endpoints/lab5/getAllPatient.js';
 
-import ApiLibrary from './modules/endpoints.js';
 
 class Server {
   constructor () {
@@ -19,7 +20,6 @@ class Server {
     this.publicDirectory  = path.normalize(path.resolve('./public'));
     this.publicEndpoint   = RegExp('\/COMP4537\/labs\/.*');
     this.apiEndpoint      = RegExp('\/COMP4537\/api\/.*');
-
     this.contentTypes     = {
       '.html': 'text/html',
       '.js': 'application/javascript',
@@ -30,6 +30,10 @@ class Server {
       '.ico': 'image/x-icon'
     };
 
+    // Services config
+    this.databaseService = new DatabaseService('localhost', 'rw_service_account', 'complab');
+ 
+    // API config
     this.apiLibrary = new ApiLibrary();
     this.apiLibrary
         .addEndpoint(new Lab3GetDateEndpoint())
@@ -37,6 +41,7 @@ class Server {
         .addEndpoint(new Lab3WriteFileEndpoint())
         .addEndpoint(new GetDefinition())
         .addEndpoint(new PostDefinition())
+        .addEndpoint(new GetAllPatients(this.databaseService))
   }
 
   handlePublic(req, res) {
@@ -145,4 +150,3 @@ class Server {
 }
 
 new Server().startServer();
-
