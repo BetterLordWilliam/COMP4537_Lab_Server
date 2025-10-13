@@ -2,15 +2,16 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { API_LIBRARY } from './modules/endpoints.js';
 
-// const app = express();
+import DatabaseService from './modules/services/databaseService.js';
 
-// app.use(express.static('public'));
+import Lab3GetDateEndpoint      from './modules/endpoints/lab3/getDateEndpoint.js';
+import Lab3ReadFileEndpoint     from './modules/endpoints/lab3/fileReadEndpoint.js';
+import Lab3WriteFileEndpoint    from './modules/endpoints/lab3/fileWriteEndpoint.js';
+import GetDefinition            from './modules/endpoints/lab4/getDefinition.js';
+import PostDefinition           from './modules/endpoints/lab4/postDefinition.js';
 
-// app.listen(port, () => {
-//     console.log(`Server running on ${port}`);
-// });
+import ApiLibrary from './modules/endpoints.js';
 
 class Server {
   constructor () {
@@ -28,6 +29,14 @@ class Server {
       '.jpg': 'image/jpg',
       '.ico': 'image/x-icon'
     };
+
+    this.apiLibrary = new ApiLibrary();
+    this.apiLibrary
+        .addEndpoint(new Lab3GetDateEndpoint())
+        .addEndpoint(new Lab3ReadFileEndpoint())
+        .addEndpoint(new Lab3WriteFileEndpoint())
+        .addEndpoint(new GetDefinition())
+        .addEndpoint(new PostDefinition())
   }
 
   handlePublic(req, res) {
@@ -65,7 +74,7 @@ class Server {
   handleApi(req, res) {
       try {
           let reqEndpoint = req.url.split('?')[0];
-          let endpoints   = API_LIBRARY[req.method] || [];
+          let endpoints   = this.apiLibrary[req.method] || [];
           let match       = false;
 
           // Loop through all the applications endpoints and see if it matches the requests endpoint
