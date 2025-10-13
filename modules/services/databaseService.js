@@ -49,9 +49,12 @@ export default class DatabaseService {
     }
 
     async dbInsertNewPatient(id, name, dateOfBirth) {
+        let date    = new Date(dateOfBirth);
+        let fdate   = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`;
+
         const [ results ] = await this.pool.execute(
             this.insertPatient,
-            { id: id, name: name, dateOfBirth: dateOfBirth }
+            { id: id, name: name, dateOfBirth: fdate }
         );
         return results;
     }

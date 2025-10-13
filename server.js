@@ -11,7 +11,8 @@ import Lab3ReadFileEndpoint     from './modules/endpoints/lab3/fileReadEndpoint.
 import Lab3WriteFileEndpoint    from './modules/endpoints/lab3/fileWriteEndpoint.js';
 import GetDefinition            from './modules/endpoints/lab4/getDefinition.js';
 import PostDefinition           from './modules/endpoints/lab4/postDefinition.js';
-import GetAllPatients           from './modules/endpoints/lab5/getAllPatient.js';
+import GetPatient               from './modules/endpoints/lab5/getPatient.js';
+import PostPatient              from './modules/endpoints/lab5/postPatient.js';
 
 
 class Server {
@@ -71,7 +72,8 @@ class Server {
         .addEndpoint(new Lab3WriteFileEndpoint())
         .addEndpoint(new GetDefinition())
         .addEndpoint(new PostDefinition())
-        .addEndpoint(new GetAllPatients(this.databaseService))
+        .addEndpoint(new GetPatient(this.databaseService))
+        .addEndpoint(new PostPatient(this.databaseService));
   }
 
   handlePublic(req, res) {
