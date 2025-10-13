@@ -30,8 +30,38 @@ class Server {
       '.ico': 'image/x-icon'
     };
 
+    // console.log(process.env.DB_HOST);
+    // console.log(process.env.DB_SERVICE_ACCOUNT);
+    // console.log(process.env.DB_SERVICE_ACCOUNT_PASSWORD);
+
     // Services config
-    this.databaseService = new DatabaseService('localhost', 'rw_service_account', 'complab');
+    this.databaseService = new DatabaseService(
+        process.env.DB_HOST,
+        process.env.DB_SERVICE_ACCOUNT,
+        process.env.DB_SERVICE_ACCOUNT_PASSWORD,
+        'complab'
+    );
+
+    // this.databaseService.dbGetAllPatients();
+
+    // this.databaseService.dbGetPatientById(3)
+    //     .then(res => { console.log(res); })
+    //     .catch(err => { console.log(err); });
+
+    // let date = new Date();
+    // this.databaseService.dbInsertNewPatient(null, 'Jim Kanother Test', `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`)
+    //     .then(res => {
+    //         console.log(res)
+
+    //         this.databaseService.dbGetAllPatients()
+    //             .then(res => console.log(res))
+    //             .catch(err => console.log(err));
+
+    //         this.databaseService.dbGetPatientById(res.insertId)
+    //             .then(res => console.log(res))
+    //             .catch(err => console.log(err));
+    //     })
+    //     .catch(err => console.log(err));
  
     // API config
     this.apiLibrary = new ApiLibrary();

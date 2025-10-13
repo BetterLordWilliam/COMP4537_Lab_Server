@@ -1,15 +1,18 @@
 import mysql from 'mysql2/promise';
 
 export default class DatabaseService {
-    constructor(host, user, test) {
+    constructor(host, user, password, database) {
         this.host       = host;
         this.user       = user;
-        this.database   = test;
+        this.password   = password;
+        this.database   = database;
 
         this.pool       = mysql.createPool({
             host: this.host,
             user: this.user,
+            password: this.password,
             database: this.database,
+            namedPlaceholders: true,
             waitForConnections: true,
             maxIdle: 10,
             idleTimeout: 60000,
@@ -18,20 +21,38 @@ export default class DatabaseService {
             keepAliveInitialDelay: 0
         });
 
-        this.getAllPatients = `SELECT * FROM patient`;
+        this.getAllPatients = 'SELECT * FROM patient';
+        this.getPatientById = 'SELECT * FROM patient WHERE id = :id';
+        this.insertPatient  = 'INSERT INTO patient VALUES ( :id, :name, :dateOfBirth )';
     }
 
     async createConnection() {
         return await mysql.createConnection({
             host: this.host,
             user: this.user,
+            password: this.password,
             database: this.database
         });
     }
 
     async dbGetAllPatients() {
-        const [ results ]   = await this.pool.query(this.getAllPatients);
+        const [ results ] = await this.pool.execute(this.getAllPatients);
+        return results;
+    }
 
-        console.log(results);
+    async dbGetPatientById(id) {
+        const [ results ] = await this.pool.execute(
+            this.getPatientById,
+            { id: id }
+        );
+        return results;
+    }
+
+    async dbInsertNewPatient(id, name, dateOfBirth) {
+        const [ results ] = await this.pool.execute(
+            this.insertPatient,
+            { id: id, name: name, dateOfBirth: dateOfBirth }
+        );
+        return results;
     }
 }
