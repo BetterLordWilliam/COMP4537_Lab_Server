@@ -21,6 +21,9 @@ export default class DatabaseService {
             keepAliveInitialDelay: 0
         });
 
+        // console.log(this.pool);
+        // console.log(typeof this.pool);
+
         this.getAllPatients = 'SELECT * FROM patient';
         this.getPatientById = 'SELECT * FROM patient WHERE id = :id';
         this.insertPatient  = 'INSERT INTO patient VALUES ( :id, :name, :dateOfBirth )';
@@ -60,8 +63,6 @@ export default class DatabaseService {
     }
 
     async dbExecuteQuery(queryString) {
-        console.log(queryString);
-
         if (queryString.includes(';')) {
             console.log('I am true');
             throw new Error('Thou shalt NOT try and run multiple queries against my database.');
@@ -71,12 +72,11 @@ export default class DatabaseService {
             throw new Error('Thou shalt NOT try and drop or delete anything, not that you could if you even wanted to.');
         }
 
-        const [ results, error ] = await this.pool.execute(
+        const [ results ] = await this.pool.execute(
             queryString
         );
 
         console.log(results);
-        console.log(error);
 
         return results;
     }
