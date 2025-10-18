@@ -6,38 +6,71 @@ export default class GetPatients extends ApiEndpoint {
         this.databaseService = databaseService;
     }
 
-    handle(req, res) {
-        let [ reqUrl, reqQuery ] = req.url.split("?");
-
-        if (reqQuery !== undefined) {
-            let searchParams;
-            let hasId;
-            let id;
-
-            searchParams = new URLSearchParams(reqQuery);
-            hasId = searchParams.has('id');
-
-            if (!hasId) {
-                return this.writeBadRequest(res, {
-                    message: 'if requesting a specific patient, id search parameter cannot be null',
+    tryGetPatient(req, res, id) {
+        return this.databaseService.dbGetPatientById(id)
+            .then(dbRes => {
+                this.writeSuccess(res, {
+                    message: `database user information for id of ${id}`,
+                    data: dbRes
                 });
-            }
+            })
+            .catch(err => {
+                this.writeServerFail(res, {
+                    message: 'database query failed.',
+                    error: err
+                });
+            });
+    }
 
-            id = searchParams.get('id');
-
-            return this.databaseService.dbGetPatientById(id)
+    tryRunSQL(req, res, query) {
+        try {
+            return this.databaseService.dbExecuteQuery(query)
                 .then(dbRes => {
                     this.writeSuccess(res, {
-                        message: `database user information for id of ${id}`,
+                        message: 'Database query executed successfully.',
                         data: dbRes
                     });
                 })
-                .catch(err => {
+                .catch(dbErr => {
                     this.writeServerFail(res, {
-                        message: 'database query failed.',
-                        error: err
+                        message: 'Database query failed.',
+                        error: dbErr
                     });
                 });
+
+        } catch (err) {
+            return this.writeBadRequest(res, {
+                message: 'You really thought?',
+                error: err
+            })
+        }
+    }
+
+    handle(req, res) {
+        let [ reqUrl, reqQuery ] = req.url.split("?");
+        let searchParams;
+        let hasQuery;
+        let hasId;
+        let id;
+        let query;
+
+        if (reqQuery !== undefined) {
+
+            searchParams = new URLSearchParams(reqQuery);
+            hasId = searchParams.has('id');
+            hasQuery = searchParams.has('q');
+
+            if (hasQuery) {
+                query = searchParams.get('q');
+                return this.tryRunSQL(req, res, query);
+            } else if (hasId) {
+                id = searchParams.get('id');
+                return this.tryGetPatient(req, res, id);
+            } else {
+                return this.writeBadRequest(res, {
+                    message: 'You need to provide \'id\' parameter to get a patient'
+                });
+            }
 
         } else {
             return this.databaseService.dbGetAllPatients()

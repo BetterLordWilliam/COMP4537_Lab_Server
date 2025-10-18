@@ -60,9 +60,23 @@ export default class DatabaseService {
     }
 
     async dbExecuteQuery(queryString) {
-        const [ results ] = await this.pool.execute(
+        console.log(queryString);
+
+        if (queryString.includes(';')) {
+            console.log('I am true');
+            throw new Error('Thou shalt NOT try and run multiple queries against my database.');
+        }
+        if (queryString.includes('drop') || bodyString.includes('delete')) {
+            console.log('I am also true');
+            throw new Error('Thou shalt NOT try and drop or delete anything, not that you could if you even wanted to.');
+        }
+
+        const [ results, error ] = await this.pool.execute(
             queryString
         );
+
+        console.log(results);
+        console.log(error);
 
         return results;
     }

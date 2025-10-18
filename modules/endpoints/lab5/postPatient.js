@@ -52,37 +52,28 @@ export default class PostPatient extends ApiEndpoint {
         let bodyString;
         bodyString = body.toString().toLowerCase();
 
-        // Ultra consertative SQL, deny anything that is HERESY
-        // 1. Mutliple SQL statements, if the query contains ';', DENIED
-        // 2. Contains ALTER, DROP, DELETE, USE, DENIED
-        // 3. The service account will actually prevent these from being run, but DENY anyways
-        if (bodyString.includes(';')) {
-            return this.writeBadRequest(res, {
-                message: 'Thou shalt NOT try and run multiple queries against my database.',
-                badQuery: bodyString
-            });
-        }
-        if (bodyString.includes('drop') || bodyString.includes('delete')) {
-            return this.writeBadRequest(res, {
-                message: 'Thou shalt NOT try and drop or delete anything, not that you could if you even wanted to.',
-                badQuery: bodyString
-            });
-        }
+        try {
+            // Execute the query (this is HERESY, please forgive me I am being forced to do this)
+            return this.databaseService.dbExecuteQuery(bodyString)
+                .then(dbRes => {
+                    this.writeSuccess(res, {
+                        message: 'Database query executed successfully.',
+                        data: dbRes
+                    });
+                })
+                .catch(err => {
+                    this.writeServerFail(res, {
+                        message: 'Database query could not be executed.',
+                        error: err
+                    });
+                });
 
-        // Execute the query (this is HERESY, please forgive me I am being forced to do this)
-        return this.databaseService.dbExecuteQuery(body.toString())
-            .then(dbRes => {
-                this.writeSuccess(res, {
-                    message: 'Database query executed successfully.',
-                    data: dbRes
-                });
-            })
-            .catch(err => {
-                this.writeServerFail(res, {
-                    message: 'Database query could not be executed.',
-                    error: err
-                });
+        } catch (err) {
+            return this.writeBadRequest(res, {
+                message: 'You really thought',
+                error: err
             });
+        }
     }
 
     handle(req, res) {
