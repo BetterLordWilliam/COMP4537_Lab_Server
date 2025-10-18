@@ -58,4 +58,12 @@ export default class DatabaseService {
         );
         return results;
     }
+
+    async dbExecuteQuery(queryString) {
+        const [ results ] = await this.pool.execute(
+            queryString
+        );
+
+        return results;
+    }
 }
