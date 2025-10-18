@@ -67,7 +67,7 @@ export default class DatabaseService {
             console.log('I am true');
             throw new Error('Thou shalt NOT try and run multiple queries against my database.');
         }
-        if (queryString.includes('drop') || bodyString.includes('delete')) {
+        if (queryString.includes('drop') || queryString.includes('delete')) {
             console.log('I am also true');
             throw new Error('Thou shalt NOT try and drop or delete anything, not that you could if you even wanted to.');
         }

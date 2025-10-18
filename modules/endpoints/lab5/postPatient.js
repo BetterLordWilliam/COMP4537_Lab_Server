@@ -61,10 +61,10 @@ export default class PostPatient extends ApiEndpoint {
                         data: dbRes
                     });
                 })
-                .catch(err => {
+                .catch(dbErr => {
                     this.writeServerFail(res, {
                         message: 'Database query could not be executed.',
-                        error: err
+                        error: dbErr
                     });
                 });
 
