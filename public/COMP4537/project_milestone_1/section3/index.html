@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" />
+    <title>Section 1: JavaScript Techincalities</title>
+</head>
+<body>
+<a href="../index.html">⬅️ Back</a>
+<a href="../section2/index.html">⬅️ Previous</a>
+<h1 id="section-3-layered-architecture-restful-apis-and-cors"><strong>Section 3: Layered Architecture, RESTful APIs, and CORS</strong></h1>
+<p>This section transitions from foundational JavaScript to building a <strong>robust, well-structured Node.js HTTP server</strong>. We will establish the core operational components of our application, including a custom server class, the <strong>Layered Architectural Pattern</strong> using <strong>Services</strong>, a custom system for handling <strong>RESTful API endpoints</strong>, and, crucially, the implementation of <strong>Cross-Origin Resource Sharing (CORS)</strong>.</p>
+
+<hr />
+<h2 id="creating-a-class-for-our-server"><strong>3.1 Creating a Class for Our Server</strong></h2>
+<p>Our first step is to create a dedicated <strong>Server</strong> class. This class abstracts the low-level concerns of the native Node.js http module, handling essential tasks like reading configuration, listening for connections, and differentiating between public asset requests and API calls.</p>
+<h3 id="basic-setup-and-environment-variables"><strong>3.1.1 Basic Setup and Environment Variables</strong></h3>
+<p>For security and deployability, we read configuration details (like the operating port) from environment variables. We use process.env.PORT and define a static mimeTypeMap to correctly serve public files.<br /></p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>mimeTypeMap<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Text types</span>
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.txt&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/plain&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.html&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/html&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.css&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/css&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.js&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/javascript&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.json&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.xml&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/xml&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.csv&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/csv&#39;</span>,
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Image types</span>
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.png&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/png&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.jpg&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/jpeg&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.jpeg&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/jpeg&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.gif&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/gif&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.svg&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/svg+xml&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.webp&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/webp&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.ico&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;image/x-icon&#39;</span>,
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Audio types</span>
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.mp3&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;audio/mpeg&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.wav&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;audio/wav&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.ogg&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;audio/ogg&#39;</span>,
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Video types</span>
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.mp4&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;video/mp4&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.webm&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;video/webm&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.mov&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;video/quicktime&#39;</span>,
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Application/Document types</span>
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.pdf&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/pdf&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.zip&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/zip&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.rar&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/x-rar-compressed&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.tar&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/x-tar&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.7z&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/x-7z-compressed&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.doc&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/msword&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.docx&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/vnd.openxmlformats-officedocument.wordprocessingml.document&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.xls&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/vnd.ms-excel&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.xlsx&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.ppt&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/vnd.ms-powerpoint&#39;</span>,
+<span style="color: #BBB">        </span><span style="color: #BA2121">&#39;.pptx&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/vnd.openxmlformats-officedocument.presentationml.presentation&#39;</span>,
+<span style="color: #BBB">    </span>};
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Utility</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.port<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.PORT;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logPath<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.LOG_PATH;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.rootDir<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.cwd();
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Services</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// this.logger         = new Logger(this.logPath);</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// this.noteManager    = new NoteManager(this.logger);</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// this.apiRouter      = new ApiRouter(this.logger);</span>
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// // API Endpoints</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// this.apiRouter</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">//     .registerEndpoint(new NamesEndpoint(this.logger))</span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">//     .registerEndpoint(new NotesEndpoint(this.logger, this.noteManager));</span>
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of class later...</span>
+}
+</pre></div>
+
+<p>The core server listening logic is contained within the start() method:</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+<span style="color: #3D7B7B; font-style: italic">// constructor ...</span>
+<span style="color: #BBB">    </span>serverConfused(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">500</span>,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/html&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #BA2121">&#39;&lt;h1&gt;Something Went Very Wrong&lt;/h1&gt;&lt;p&gt;Something went verywrong on the server.&lt;/p&gt;&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>notFound(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">404</span>,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;text/html&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #BA2121">&#39;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;p&gt;The content you are looking for could not be found. Get wrekt.&lt;/p&gt;&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>handlePublic(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// todo...</span>
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>handleApi(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// todo...</span>
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>start()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>http.createServer((req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>=&gt;<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">try</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">`Request received, method: </span><span style="color: #A45A77; font-weight: bold">${</span>req.method<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">, pathname: </span><span style="color: #A45A77; font-weight: bold">${</span>req.url<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Server&#39;</span>);
+
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>proto<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>(req.socket.encrypted)<span style="color: #BBB"> </span><span style="color: #666">?</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;https&#39;</span><span style="color: #BBB"> </span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;http&#39;</span>;<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// a little redundant but in case</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>url<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>URL(<span style="color: #BA2121">`</span><span style="color: #A45A77; font-weight: bold">${</span>proto<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">://</span><span style="color: #A45A77; font-weight: bold">${</span>req.headers.host<span style="color: #A45A77; font-weight: bold">}${</span>req.url<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>);
+
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Origin&#39;</span>]<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;*&#39;</span>;
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Methods&#39;</span>]<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;GET, POST, PUT, PATCH, DELETE, OPTIONS&#39;</span>;
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Headers&#39;</span>]<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Content-Type, Authorization&#39;</span>;
+
+<span style="color: #BBB">                </span><span style="color: #3D7B7B; font-style: italic">// Preflight request first and foremost</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(req.method<span style="color: #BBB"> </span><span style="color: #666">===</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;OPTIONS&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>res.writeHead(<span style="color: #666">204</span>,<span style="color: #BBB"> </span>res.headers);
+<span style="color: #BBB">                    </span>res.end();
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">return</span>;
+<span style="color: #BBB">                </span>}
+
+<span style="color: #BBB">                </span><span style="color: #3D7B7B; font-style: italic">// API or public</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(url.pathname.startsWith(<span style="color: #BA2121">&#39;/api&#39;</span>))<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">this</span>.handleApi(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(req.method<span style="color: #BBB"> </span><span style="color: #666">===</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;GET&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">this</span>.handlePublic(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">throw</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span><span style="color: #CB3F38; font-weight: bold">Error</span>(<span style="color: #BA2121">&#39;Non-GET request for public resource&#39;</span>);
+<span style="color: #BBB">                </span>}
+<span style="color: #BBB">            </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">catch</span><span style="color: #BBB"> </span>(err)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.serverConfused(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Server really failed big time </span><span style="color: #A45A77; font-weight: bold">${</span>err<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>);
+<span style="color: #BBB">            </span>}
+
+<span style="color: #BBB">        </span>}).listen(<span style="color: #008000; font-weight: bold">this</span>.port);
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">&#39;Server started.&#39;</span>);
+<span style="color: #BBB">    </span>}
+}
+
+<span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Server().start();
+</pre></div>
+
+<p>This method  of the Server class abstracts the http.createServer method from nodes http module. It looks for /api at the start of the pathname property of the incoming requests URL and depending on this existence it routes traffic to an api handler or (if the method if GET) it routes it to the public handler.</p>
+<p>If neither of these are the case, the an error is raised which is caught by the outer try catch, which invokes the method to display the servers error page.</p>
+
+<h3 id="serving-public-resources-and-request-differentiation"><strong>3.1.2 Serving Public Resources and Request Differentiation</strong></h3>
+<p>The server's callback must determine whether a request is for a static file (like index.html) or an API resource.</p>
+<ul>
+<li>If the request URL path starts with /api, it is routed to handleApi.</li>
+<li>If the method is GET and the path is not /api, it is treated as a request for a static asset, routed to handlePublic.</li>
+<li>All other unknown request types are handled by serverConfused.</li>
+</ul>
+<p>The handlePublic method uses asynchronous file system operations (fs/promises) to read files from the /public directory. A key piece of logic involves path resolution: if a request points to a directory (ends with / or has no file extension), we automatically serve its index.html file.<br />
+To ensure the browser correctly interprets the returned file, we use a static mimeTypeMap to set the correct Content-Type header. Errors during file reading (e.g., file not found) are caught, and a 404 response is sent via notFound.</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+<span style="color: #3D7B7B; font-style: italic">// constructor ...</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>handlePublic(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">try</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>item<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>(reqUrl.pathname.endsWith(<span style="color: #BA2121">&#39;/&#39;</span>)<span style="color: #BBB"> </span><span style="color: #666">||</span><span style="color: #BBB"> </span><span style="color: #666">!</span>path.extname(reqUrl.pathname))
+<span style="color: #BBB">                </span><span style="color: #666">?</span><span style="color: #BBB"> </span>path.join(reqUrl.pathname,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;index.html&#39;</span>)
+<span style="color: #BBB">                </span><span style="color: #666">:</span><span style="color: #BBB"> </span>reqUrl.pathname;
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>filePath<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span>path.join(<span style="color: #008000; font-weight: bold">this</span>.rootDir,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;public&#39;</span>,<span style="color: #BBB"> </span>item);
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>file<span style="color: #BBB">      </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span>fs.readFile(filePath);
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>fileExt<span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span>path.extname(filePath).toLowerCase();
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>mime<span style="color: #BBB">      </span><span style="color: #666">=</span><span style="color: #BBB"> </span>Server.mimeTypeMap[fileExt]<span style="color: #BBB"> </span><span style="color: #666">||</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/octet-stream&#39;</span>;
+
+<span style="color: #BBB">            </span>res.writeHead(<span style="color: #666">200</span>,<span style="color: #BBB"> </span>{<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span>mime<span style="color: #BBB"> </span>});
+<span style="color: #BBB">            </span>res.end(file);
+
+<span style="color: #BBB">        </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">catch</span><span style="color: #BBB"> </span>(err)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Public request failed: </span><span style="color: #A45A77; font-weight: bold">${</span>err<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>);
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.notFound(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>handleApi(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>(<span style="color: #008000; font-weight: bold">this</span>.apiRouter))<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span>res.writeHead(<span style="color: #666">500</span>,<span style="color: #BBB"> </span>{<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span><span style="color: #BBB"> </span>});
+<span style="color: #BBB">            </span>res.end(<span style="color: #008000">JSON</span>.stringify({<span style="color: #BBB"> </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;No API Router configured.&#39;</span><span style="color: #BBB"> </span>}));
+<span style="color: #BBB">        </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.apiRouter.handleRequest(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+<span style="color: #3D7B7B; font-style: italic">// start...</span>
+}
+
+<span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Server().start();
+</pre></div>
+
+<hr />
+<h2 id="layered-architecture-and-services"><strong>3.2 Layered Architecture and Services</strong></h2>
+<p>To design a system that is easily extensible, maintainable, and testable, we enforce the <strong>Layered Architectural Pattern</strong>. This principle divides the application into distinct, decoupled layers, ensuring that business rules and data persistence logic are separated from one another.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Layer</th>
+<th style="text-align: left;">Responsibility</th>
+<th style="text-align: left;">Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Business Logic Layer</strong></td>
+<td style="text-align: left;">Authentication, data validation, and sequencing operations (e.g., ensuring a user is logged in before saving a note).</td>
+<td style="text-align: left;">ApiEndpoint, ApiRouter</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Data Access Layer</strong></td>
+<td style="text-align: left;">Low-level mechanics of data persistence (e.g., performing a database query, reading/writing files).</td>
+<td style="text-align: left;"><strong>Services</strong> (NoteManager, MySQLService)</td>
+</tr>
+</tbody>
+</table>
+<img src="./layeredarchitecture.png" alt="a cool diagram should be here" />
+
+<h3 id="the-role-of-services"><strong>The Role of Services</strong></h3>
+<p>A <strong>Service</strong> provides an abstracted, controlled set of methods for interacting with a specific resource, thus forming the Data Access Layer. For example, our NoteManager service encapsulates all file system interactions, so the API layer never needs to know <em>how</em> data is stored, only <em>what</em> method to call to store it.</p>
+
+<hr />
+<h2 id="practical-services-logger-and-notemanager"><strong>3.3 Practical Services: Logger and NoteManager</strong></h2>
+<h3 id="the-logger-service"><strong>3.3.1 The Logger Service</strong></h3>
+<p>The Logger is a crucial utility service responsible for auditing application events. It formats messages and directs them to either the console or persistent log files (info.log and error.log). This separation ensures logging logic doesn't clutter our main server or API handler files.</p>
+
+<strong>./modules/services/logger.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>fs<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;fs/promises&#39;</span>;
+<span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>ServerStrings<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;../serverStrings.js&#39;</span>;
+
+<span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Logger<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>(logsPath,<span style="color: #BBB"> </span>toConsole<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">true</span>,<span style="color: #BBB"> </span>toFile<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">true</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.toConsole<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span>toConsole;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.toFile<span style="color: #BBB">     </span><span style="color: #666">=</span><span style="color: #BBB"> </span>toFile;
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">this</span>.toFile)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logsPath<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>logsPath;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>logInformation(message,<span style="color: #BBB"> </span>tag<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>formattedLogLine<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>ServerStrings.LOG_INFO(message,<span style="color: #BBB"> </span>tag);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">this</span>.toFile)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span>fs.appendFile(<span style="color: #008000; font-weight: bold">this</span>.logsPath<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;/info.log&#39;</span>,<span style="color: #BBB"> </span>formattedLogLine<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;\n&#39;</span>);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">this</span>.toConsole)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span>console.log(formattedLogLine);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>logError(message,<span style="color: #BBB"> </span>tag<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>formattedLogLine<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>ServerStrings.LOG_ERROR(message,<span style="color: #BBB"> </span>tag);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">this</span>.toFile)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span>fs.appendFile(<span style="color: #008000; font-weight: bold">this</span>.logsPath<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;/error.log&#39;</span>,<span style="color: #BBB"> </span>formattedLogLine<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;\n&#39;</span>);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">this</span>.toConsole)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span>console.log(formattedLogLine);
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<strong>./index.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// mimeTypesMap ...</span>
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Utility</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.port<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.PORT;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logPath<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.LOG_PATH;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.rootDir<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.cwd();
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Services</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB">         </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Logger(<span style="color: #008000; font-weight: bold">this</span>.logPath);
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of the Server methods...</span>
+}
+</pre></div>
+
+<h3 id="the-notemanager-service-data-access-layer"><strong>3.3.2 The NoteManager Service (Data Access Layer)</strong></h3>
+<p>The NoteManager is our core data access service. In this demonstration, it handles the low-level logic of creating and reading text files in a local /notes directory, thereby fulfilling the Data Access Layer's responsibility.</p>
+
+<strong>./modules/services/notemanager.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>fs<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;fs/promises&#39;</span>;
+<span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>path<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;path&#39;</span>;
+
+<span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>NoteManager<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>(logger)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>logger;
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>createNote(id,<span style="color: #BBB"> </span>content)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">try</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">`Creating new note with ID: </span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteManager&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>notePath<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>path.join(<span style="color: #BA2121">&#39;./notes&#39;</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">`</span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">.txt`</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span>fs.writeFile(notePath,<span style="color: #BBB"> </span>content,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;utf8&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">true</span>;
+
+<span style="color: #BBB">        </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">catch</span><span style="color: #BBB"> </span>(err)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Failed to write to note with ID: </span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">, </span><span style="color: #A45A77; font-weight: bold">${</span>err<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteManager&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>readNote(id)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">try</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">`Reading note with ID: </span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteManager&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>notePath<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>path.join(<span style="color: #BA2121">&#39;./notes&#39;</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">`</span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">.txt`</span>);
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>content<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span>fs.readFile(notePath,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;utf8&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>content;
+
+<span style="color: #BBB">        </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">catch</span><span style="color: #BBB"> </span>(err)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Failed to read note with ID: </span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">, </span><span style="color: #A45A77; font-weight: bold">${</span>err<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteManager&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">null</span>;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<strong>./index.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// mimeTypesMap ...</span>
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Utility</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.port<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.PORT;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logPath<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.LOG_PATH;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.rootDir<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.cwd();
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Services</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB">         </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Logger(<span style="color: #008000; font-weight: bold">this</span>.logPath);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.noteManager<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>NoteManager(<span style="color: #008000; font-weight: bold">this</span>.logger);
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of the Server methods...</span>
+}
+</pre></div>
+
+<h3 id="defining-application-business-rules-the-scenario"><strong>3.3.3 Defining Application Business Rules (The Scenario)</strong></h3>
+<p>To demonstrate the utility of our architectural layers, we establish a simple, non-negotiable <strong>business rule</strong> for our fictional note-taking application:</p>
+<ol>
+<li><strong>Note ID Requirement:</strong> A unique identifier (id) <strong>must</strong> be provided for every note. Without an ID, our system cannot correctly create, retrieve, or manage the note file. The API layer is responsible for explicitly enforcing this rule before passing the request to the NoteManager service.</li>
+</ol>
+
+<hr />
+<h2 id="rest-architecture-apiendpoint-and-apirouter"><strong>3.4 REST Architecture: ApiEndpoint and ApiRouter</strong></h2>
+<p>To manage requests routed to handleApi, we implement a custom routing system that adheres to the <strong>REST (Representational State Transfer)</strong> standard. This involves using two classes to structure our endpoints cleanly.</p>
+<h3 id="the-apiendpoint-base-class"><strong>3.4.1 The ApiEndpoint Base Class</strong></h3>
+<p>ApiEndpoint is a base class that all resource handlers will extend (like our upcoming NoteEndpoint). It provides default, overridable handlers for the main HTTP methods (GET, POST, etc.) and includes static utility methods (writeSuccessResponse, writeBadRequestResponse) to ensure all API responses are uniformly structured and status codes are correctly managed.</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>ApiEndpoint<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>(logger,<span style="color: #BBB"> </span>resourceName)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>logger;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>resourceName;
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// Default handler for unimplemented methods</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>unimplemented(res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">500</span>,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #008000">JSON</span>.stringify({<span style="color: #BBB"> </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Unimplemeneted endpoint&#39;</span><span style="color: #BBB"> </span>}));
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>writeSuccessResponse(res,<span style="color: #BBB"> </span>data,<span style="color: #BBB"> </span>modifier<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">0</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">200</span><span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>modifier,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #008000">JSON</span>.stringify(data));
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>writeBadRequestResponse(res,<span style="color: #BBB"> </span>data,<span style="color: #BBB"> </span>modifier<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">0</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">400</span><span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>modifier,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #008000">JSON</span>.stringify(data));
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>writeServerErrorResponse(res,<span style="color: #BBB"> </span>data,<span style="color: #BBB"> </span>modifier<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">0</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">500</span><span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>modifier,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span>
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #008000">JSON</span>.stringify(data));
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// HTTP GET</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>get(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>ApiEndpoint.unimplemented(res);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Unimplemeneted GET method called on endpoint: </span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiEndpoint&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// HTTP POST</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>post(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>ApiEndpoint.unimplemented(res);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Unimplemeneted POST method called on endpoint: </span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiEndpoint&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// HTTP PUT</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>put(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>ApiEndpoint.unimplemented(res);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Unimplemeneted PUT method called on endpoint: </span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiEndpoint&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// HTTP PATCH</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>patch(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>ApiEndpoint.unimplemented(res);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Unimplemeneted PATCH method called on endpoint: </span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiEndpoint&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// HTTP DELETE</span>
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">delete</span>(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>ApiEndpoint.unimplemented(res);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Unimplemeneted DELETE method called on endpoint: </span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiEndpoint&#39;</span>);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>toString()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.resourceName;
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<h3 id="the-apirouter-class"><strong>3.4.2 The ApiRouter Class</strong></h3>
+<p>The ApiRouter acts as the traffic controller for all API calls. It holds a collection of registered endpoints and is responsible for matching an incoming request's URL (e.g., /api/notes) to the correct endpoint instance (notesEndpoint). It then dynamically invokes the corresponding HTTP method handler (notesEndpoint.get()).</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>ApiRouter<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>(logger,<span style="color: #BBB"> </span>basePath<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB">     </span><span style="color: #666">=</span><span style="color: #BBB"> </span>logger;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.basePath<span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span>basePath;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.endpoints<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span>[];
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>pathify(resourceName)<span style="color: #BBB"> </span>{<span style="color: #BBB"> </span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #BA2121">`/api</span><span style="color: #A45A77; font-weight: bold">${</span><span style="color: #008000; font-weight: bold">this</span>.basePath<span style="color: #A45A77; font-weight: bold">}${</span>resourceName<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>;
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>endpointNotFound(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>res.writeHead(<span style="color: #666">500</span>,<span style="color: #BBB"> </span>{<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Content-Type&#39;</span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;application/json&#39;</span><span style="color: #BBB"> </span>});
+<span style="color: #BBB">        </span>res.end(<span style="color: #008000">JSON</span>.stringify({<span style="color: #BBB"> </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;No such endpoint under this router.&#39;</span><span style="color: #BBB"> </span>}));
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Endpoint not found: </span><span style="color: #A45A77; font-weight: bold">${</span>reqUrl.pathname<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiRouter&#39;</span>);
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>registerEndpoint(endpoint)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.endpoints.push(endpoint);
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>;
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span>handleRequest(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">let</span><span style="color: #BBB"> </span>mEndpoint;
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">for</span><span style="color: #BBB"> </span>(<span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>endpoint<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">of</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.endpoints)<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>endpointPath<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.pathify(endpoint);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(endpointPath<span style="color: #BBB"> </span><span style="color: #666">===</span><span style="color: #BBB"> </span>reqUrl.pathname)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">&#39;Resource endpoint located&#39;</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;ApiRouter&#39;</span>);
+<span style="color: #BBB">                </span>mEndpoint<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>endpoint;
+<span style="color: #BBB">            </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">continue</span>;
+<span style="color: #BBB">            </span>}
+<span style="color: #BBB">        </span>}
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>mEndpoint)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.endpointNotFound(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">return</span>;
+<span style="color: #BBB">        </span>}
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Invoke the corresponding REST method</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">switch</span><span style="color: #BBB"> </span>(req.method)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">case</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;GET&#39;</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.get(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">case</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;POST&#39;</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.post(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">case</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;PUT&#39;</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.put(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">case</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;PATCH&#39;</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.patch(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">case</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;DELETE&#39;</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.<span style="color: #A2F; font-weight: bold">delete</span>(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #666">:</span>
+<span style="color: #BBB">                </span>mEndpoint.get(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">break</span>;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<bold>./index.js</bold>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// mimeTypesMap ...</span>
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Utility</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.port<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.PORT;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logPath<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.LOG_PATH;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.rootDir<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.cwd();
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Services</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB">         </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Logger(<span style="color: #008000; font-weight: bold">this</span>.logPath);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.noteManager<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>NoteManager(<span style="color: #008000; font-weight: bold">this</span>.logger);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.apiRouter<span style="color: #BBB">      </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>ApiRouter(<span style="color: #008000; font-weight: bold">this</span>.logger);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of the Server methods...</span>
+}
+</pre></div>
+
+<hr />
+<h2 id="creating-an-api-endpoint-for-notes"><strong>3.5 Creating an API Endpoint for Notes</strong></h2>
+<p>The NoteEndpoint class represents the Business Logic Layer for our note resource. It connects the external API structure to our internal NoteManager service (Data Access Layer).</p>
+<h3 id="implementing-get-read"><strong>Implementing GET (Read)</strong></h3>
+<p>The GET method performs the critical business logic of checking the URL query parameters for the required id and then, if valid, requests the data from the service layer.</p>
+<h3 id="implementing-post-createupdate"><strong>Implementing POST (Create/Update)</strong></h3>
+<p>The POST method is more complex as it involves streaming data. It asynchronously collects the incoming request payload (req.on('data') and req.on('end')), parses the JSON, validates the fields (ID and content), and then uses the noteManager to persist the data to the file system.</p>
+
+<strong>./modules/rest/endpoints/notes.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>ApiEndpoint<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;../apiEndpoint.js&#39;</span>;
+<span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>ServerStrings<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;../../serverStrings.js&#39;</span>;
+
+<span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>NoteEndpoint<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">extends</span><span style="color: #BBB"> </span>ApiEndpoint<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>(logger,<span style="color: #BBB"> </span>noteManager)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">super</span>(logger,<span style="color: #BBB"> </span>ServerStrings.NOTES_ENDPOINT);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.noteManager<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>noteManager;
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>get(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">`Request request received </span><span style="color: #A45A77; font-weight: bold">${</span>reqUrl.searchParams<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteEndpoint&#39;</span>);
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Check search params for ID (aka business logic)</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>id<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>reqUrl.searchParams.get(<span style="color: #BA2121">&#39;id&#39;</span>);
+
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>id)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span>ApiEndpoint.writeBadRequestResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;You are required to specify a notes `id`&#39;</span>
+<span style="color: #BBB">            </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">        </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>data<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.noteManager.readNote(id);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>data)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span>ApiEndpoint.writeServerErrorResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">`Note with id \&#39;</span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">\&#39; could not be read, likely does not exist`</span>
+<span style="color: #BBB">                </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">            </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span>ApiEndpoint.writeSuccessResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">`Successfully read note with id \&#39;</span><span style="color: #A45A77; font-weight: bold">${</span>id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">\&#39;`</span>,
+<span style="color: #BBB">                    </span>content<span style="color: #666">:</span><span style="color: #BBB"> </span>data
+<span style="color: #BBB">                </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">            </span>}
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>post(reqUrl,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>data<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>[];
+
+<span style="color: #BBB">        </span>req.on(<span style="color: #BA2121">&#39;data&#39;</span>,<span style="color: #BBB"> </span>chunk<span style="color: #BBB"> </span>=&gt;<span style="color: #BBB"> </span>data.push(chunk));
+<span style="color: #BBB">        </span>req.on(<span style="color: #BA2121">&#39;end&#39;</span>,<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span>()<span style="color: #BBB"> </span>=&gt;<span style="color: #BBB"> </span>{
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>parsedData<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000">JSON</span>.parse(Buffer.concat(data).toString());
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">&#39;Parsed incoming data&#39;</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;NoteEndpoint&#39;</span>);
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>parsedData.id<span style="color: #BBB"> </span><span style="color: #666">||</span><span style="color: #BBB"> </span><span style="color: #666">!</span>parsedData.content)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span>ApiEndpoint.writeBadRequestResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;To create a new note you need to specify the \&#39;id\&#39; and \&#39;content\&#39; parameters&#39;</span>
+<span style="color: #BBB">                </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">            </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>status<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">await</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.noteManager.createNote(parsedData.id,<span style="color: #BBB"> </span>parsedData.content);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #666">!</span>status)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>ApiEndpoint.writeServerErrorResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                        </span>message<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">`Could not create note with id </span><span style="color: #A45A77; font-weight: bold">${</span>parsedData.id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>
+<span style="color: #BBB">                    </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">                </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>ApiEndpoint.writeSuccessResponse(res,<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                        </span>messge<span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">`Successfully created note with id </span><span style="color: #A45A77; font-weight: bold">${</span>parsedData.id<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>
+<span style="color: #BBB">                    </span>},<span style="color: #BBB"> </span><span style="color: #666">10</span>);
+<span style="color: #BBB">                </span>}
+<span style="color: #BBB">            </span>}
+<span style="color: #BBB">        </span>});
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<strong>./index.js</strong>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// mimeTypesMap ...</span>
+
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">constructor</span>()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Utility</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.port<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.PORT;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logPath<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.env.LOG_PATH;
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.rootDir<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>process.cwd();
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// Services</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger<span style="color: #BBB">         </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>Logger(<span style="color: #008000; font-weight: bold">this</span>.logPath);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.noteManager<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>NoteManager(<span style="color: #008000; font-weight: bold">this</span>.logger);
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.apiRouter<span style="color: #BBB">      </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>ApiRouter(<span style="color: #008000; font-weight: bold">this</span>.logger);
+
+<span style="color: #BBB">        </span><span style="color: #3D7B7B; font-style: italic">// API Endpoints</span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.apiRouter
+<span style="color: #BBB">            </span>.registerEndpoint(<span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>NotesEndpoint(<span style="color: #008000; font-weight: bold">this</span>.logger,<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">this</span>.noteManager));
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of the Server methods...</span>
+}
+</pre></div>
+
+<hr />
+<h2 id="cross-origin-resource-sharing-cors"><strong>3.6 Cross-Origin Resource Sharing (CORS)</strong></h2>
+<p>Since our client-side application will eventually be hosted on a separate domain/port (a different <strong>origin</strong>) from our Node.js API, we must address the issue of <strong>Cross-Origin Resource Sharing (CORS)</strong>.<br />
+CORS is a security mechanism enforced by web browsers. By default, browsers prevent scripts loaded from one origin (e.g., a web client running locally) from making &quot;cross-origin&quot; requests to an API running on another origin (e.g., our self-hosted Node.js server). This prevents malicious sites from performing unauthorized actions.<br />
+To explicitly grant permission for our client to communicate with our API, we must include specific HTTP response headers. We implement a dedicated addCorsHeaders method in our Server class and call it for every response:</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span>Server<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #3D7B7B; font-style: italic">// rest of the Server members...</span>
+<span style="color: #BBB">    </span>start()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span>http.createServer((req,<span style="color: #BBB"> </span>res)<span style="color: #BBB"> </span>=&gt;<span style="color: #BBB"> </span>{
+
+<span style="color: #BBB">            </span><span style="color: #008000; font-weight: bold">try</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">`Request received, method: </span><span style="color: #A45A77; font-weight: bold">${</span>req.method<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">, pathname: </span><span style="color: #A45A77; font-weight: bold">${</span>req.url<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>,<span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Server&#39;</span>);
+
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>proto<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>(req.socket.encrypted)<span style="color: #BBB"> </span><span style="color: #666">?</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;https&#39;</span><span style="color: #BBB"> </span><span style="color: #666">:</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;http&#39;</span>;<span style="color: #BBB"> </span><span style="color: #3D7B7B; font-style: italic">// a little redundant but in case</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">const</span><span style="color: #BBB"> </span>url<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span>URL(<span style="color: #BA2121">`</span><span style="color: #A45A77; font-weight: bold">${</span>proto<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">://</span><span style="color: #A45A77; font-weight: bold">${</span>req.headers.host<span style="color: #A45A77; font-weight: bold">}${</span>req.url<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>);
+
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Origin&#39;</span>]<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;*&#39;</span>;
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Methods&#39;</span>]<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;GET, POST, PUT, PATCH, DELETE, OPTIONS&#39;</span>;
+<span style="color: #BBB">                </span>res.headers[<span style="color: #BA2121">&#39;Access-Control-Allow-Headers&#39;</span>]<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;Content-Type, Authorization&#39;</span>;
+
+<span style="color: #BBB">                </span><span style="color: #3D7B7B; font-style: italic">// Preflight request first and foremost</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(req.method<span style="color: #BBB"> </span><span style="color: #666">===</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;OPTIONS&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span>res.writeHead(<span style="color: #666">204</span>,<span style="color: #BBB"> </span>res.headers);
+<span style="color: #BBB">                    </span>res.end();
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">return</span>;
+<span style="color: #BBB">                </span>}
+
+<span style="color: #BBB">                </span><span style="color: #3D7B7B; font-style: italic">// API or public</span>
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(url.pathname.startsWith(<span style="color: #BA2121">&#39;/api&#39;</span>))<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">this</span>.handleApi(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">if</span><span style="color: #BBB"> </span>(req.method<span style="color: #BBB"> </span><span style="color: #666">===</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;GET&#39;</span>)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">this</span>.handlePublic(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">else</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">                    </span><span style="color: #008000; font-weight: bold">throw</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">new</span><span style="color: #BBB"> </span><span style="color: #CB3F38; font-weight: bold">Error</span>(<span style="color: #BA2121">&#39;Non-GET request for public resource&#39;</span>);
+<span style="color: #BBB">                </span>}
+<span style="color: #BBB">            </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">catch</span><span style="color: #BBB"> </span>(err)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.serverConfused(url,<span style="color: #BBB"> </span>req,<span style="color: #BBB"> </span>res);
+<span style="color: #BBB">                </span><span style="color: #008000; font-weight: bold">this</span>.logger.logError(<span style="color: #BA2121">`Server really failed big time </span><span style="color: #A45A77; font-weight: bold">${</span>err<span style="color: #A45A77; font-weight: bold">}</span><span style="color: #BA2121">`</span>);
+<span style="color: #BBB">            </span>}
+
+<span style="color: #BBB">        </span>}).listen(<span style="color: #008000; font-weight: bold">this</span>.port);
+<span style="color: #BBB">        </span>
+<span style="color: #BBB">        </span><span style="color: #008000; font-weight: bold">this</span>.logger.logInformation(<span style="color: #BA2121">&#39;Server started.&#39;</span>);
+<span style="color: #BBB">    </span>}
+}
+</pre></div>
+
+<p>The use of * for Access-Control-Allow-Origin grants access to any domain. Furthermore, we explicitly handle the <strong>preflight request</strong>—an automatic OPTIONS request sent by the browser before complex methods like POST or PUT—by responding with a 204 No Content status code. This handshake is essential for allowing the client to proceed with the actual API call.</p>
+
+<hr />
+<h2>Summary</h2>
+<p>Now we have a robust foundation upon which more API endpoints can easily be added to by creating further extensions of the ApiEndpoint class and simply registering them to the ApiRouter class. Furthermore we have established a layered organization for the project, separating data access and business logic from each other which will result in the application being more extensible and maintainable.</p>
+<p>Project directory tree</p>
+<pre>
+root
+│   .env.dev
+│   .gitignore
+│   index.js
+│   index.json
+│   package-lock.json
+│   package.json
+│   testmodule.js
+├───.vscode
+├───logs
+│       error.log
+│       info.log
+├───modules
+│   │   closureExample.js
+│   │   math.js
+│   │   promiseExamples.js
+│   │   serverMessages.js
+│   │   serverStrings.js
+│   ├───rest
+│   │   │   apiEndpoint.js
+│   │   │   apiRouter.js
+│   │   └───endpoints
+│   │           names.js
+│   │           notes.js
+│   └───services
+│           logger.js
+│           notemanager.js
+├───node_modules
+├───notes
+├───public
+└───scripts
+</pre>
+
+<a href="../section4/index.html">➡️ Continue</a>
+</body>
+</html>

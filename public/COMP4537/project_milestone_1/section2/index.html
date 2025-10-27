@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" />
+    <title>Section 1: JavaScript Techincalities</title>
+</head>
+<body>
+<a href="../index.html">⬅️ Back</a>
+<a href="../section1/index.html">⬅️ Previous</a>
+
+<h1 id="section-2-project-setup-oop-and-modern-modules"><strong>Section 2: Project Setup, OOP, and Modern Modules</strong></h1>
+<p>Now that we've covered the core technicalities of JavaScript, it's time to establish a structured project environment using modern syntax for <strong>Object-Oriented Programming (OOP)</strong> and <strong>Modules (ESM)</strong>. This structure is foundational for building a maintainable, self-hosted application.</p>
+<h2 id="prerequisites"><strong>Prerequisites</strong></h2>
+<p>We assume you have:</p>
+<ul>
+<li><strong>Node.js</strong> installed (which includes the Node.js runtime).</li>
+<li><strong>npm</strong> (Node Package Manager) installed.</li>
+<li>A <strong>shell environment</strong> (PowerShell, Git Bash, or Linux/macOS terminal) to run commands.</li>
+</ul>
+<hr />
+<h2 id="initial-project-setup-with-node-and-npm"><strong>Initial Project Setup with Node and npm</strong></h2>
+<p>We begin by initializing our project to take advantage of npm's package management capabilities and to configure it for the modern module system.</p>
+<ol>
+<li><p><strong>Create the Project Directory:</strong><br />
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>mkdir example
+<span style="color: #008000">cd </span>example
+</pre></div>
+
+</li>
+<li><p><strong>Initialize the Project:</strong> Run the npm init command.<br />
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>npm init
+</pre></div>
+
+<p>For the prompts, you can accept most of the defaults. However, it is <strong>critical</strong> to set the module type to <strong>module</strong> instead of the legacy commonjs when prompted, or by manually editing the resulting file.</p>
+</li>
+</ol>
+<p>Your final package.json file should look similar to this, ensuring the &quot;type&quot;: &quot;module&quot; entry is present:</p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>{
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;name&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;Name&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;version&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;1.0.0&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;description&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;Desc&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;license&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;ISC&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;author&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;type&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;module&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;main&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;server.js&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;scripts&quot;</span>:<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">&quot;start&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;node server.js&quot;</span>,
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">&quot;test&quot;</span>:<span style="color: #BBB"> </span><span style="color: #BA2121">&quot;node server.js&quot;</span>
+<span style="color: #BBB">  </span>},
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">&quot;dependencies&quot;</span>:<span style="color: #BBB"> </span>{
+<span style="color: #BBB">  </span>}
+}
+</pre></div>
+
+<h2 id="note-weve-added-a-simple-start-script-to-show-how-you-would-launch-the-application-using-npm-run-start-though-running-node-index.js-directly-is-just-as-valid-for-now"><strong>Note:</strong> We've added a simple &quot;start&quot; script to show how you would launch the application using npm run start, though running node index.js directly is just as valid for now.</h2>
+<h2 id="javascript-classes-modern-oop-syntax"><strong>JavaScript Classes: Modern OOP Syntax</strong></h2>
+<p>JavaScript's <strong>class</strong> syntax provides a clear, familiar structure for defining objects, closely resembling languages like Java or C#. Classes are the primary unit of organization for our business logic.</p>
+<h3 id="anatomy-of-a-class"><strong>Anatomy of a Class</strong></h3>
+<p>Classes support both <strong>instance</strong> and <strong>static</strong> members:</p>
+<ul>
+<li><strong>Instance Members</strong> are specific to each object created from the class (accessed via this in the constructor).</li>
+<li><strong>Static Members</strong> belong to the class definition itself, not a specific instance. They are ideal for utility functions or constants.</li>
+<li><strong>Private Members</strong>While all class members are public by default, modern JavaScript provides support for <strong>true private fields</strong> using the # prefix. While not strictly required, using private fields is best practice for true encapsulation and signals to other developers that certain members should not be modified externally.</p></li>
+</ul>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>PI<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">3.14</span>;
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>E<span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">2.72</span>;
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">constructor</span>(example)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">this</span>.#private<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>example;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfCircle(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>circumference(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #666">2</span><span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfRec(l,<span style="color: #BBB"> </span>w)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>l<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>w;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfSquare(s)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>areaOfRec(s,<span style="color: #BBB"> </span>s);
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span>instanceMethod()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span>console.log(<span style="color: #BA2121">&#39;This is an instance of the math class!&#39;</span>);
+<span style="color: #BBB">  </span>}
+}
+</pre></div>
+
+<hr />
+<h2 id="javascript-modules-esm"><strong>JavaScript Modules (ESM)</strong></h2>
+<p>In a large application, we must follow the <strong>Single Responsibility Principle</strong> (SRP)—one class per file is a common guideline. <strong>ECMAScript Modules (ESM)</strong> are the modern, standard way to manage code dependencies across files.</p>
+<h3 id="exporting-members"><strong>Exporting Members</strong></h3>
+<p>You have two primary methods for exposing code from a file (module):</p>
+<h4 id="named-exports-export"><strong>1. Named Exports (export)</strong></h4>
+<p>You can export multiple symbols (classes, functions, variables) from a single file. The names must be imported exactly as they are exported.<br />
+
+<strong>modules/calculator.js</strong></p>
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>PI<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">3.14</span>;
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>E<span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">2.72</span>;
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfCircle(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>circumference(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #666">2</span><span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfRec(l,<span style="color: #BBB"> </span>w)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>l<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>w;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfSquare(s)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>areaOfRec(s,<span style="color: #BBB"> </span>s);
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span>instanceMethod()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span>console.log(<span style="color: #BA2121">&#39;This is an instance of the math class!&#39;</span>);
+<span style="color: #BBB">  </span>}
+}
+
+<span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">function</span><span style="color: #BBB"> </span>addition(a,<span style="color: #BBB"> </span>b)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>a<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>b;
+}
+
+<span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">async</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">function</span><span style="color: #BBB"> </span>asyncAddition(a,<span style="color: #BBB"> </span>b)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000">Promise</span>.resolve(a<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>b);<span style="color: #BBB">  </span><span style="color: #3D7B7B; font-style: italic">// Totally realistic async function</span>
+}
+</pre></div>
+
+<strong>index.js</strong></p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>{<span style="color: #BBB"> </span><span style="color: #008000">Math</span>,<span style="color: #BBB"> </span>addition,<span style="color: #BBB"> </span>asyncAddition<span style="color: #BBB"> </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;./modules/math.js&#39;</span>;
+</pre></div>
+
+<h4 id="default-export-export-default"><strong>2. Default Export (export default)</strong></h4>
+<p>You can only have one default export per file. The advantage is that the importing module can choose <strong>any name</strong> for the imported symbol, which can be convenient but may lead to inconsistency.<br />
+<strong>modules/calculator.js</strong></p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">export</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">default</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">class</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span><span style="color: #BBB"> </span>{
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>PI<span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">3.14</span>;
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>E<span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #666">2.72</span>;
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfCircle(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>circumference(r)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span><span style="color: #666">2</span><span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span><span style="color: #008000">Math</span>.PI<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>r;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfRec(l,<span style="color: #BBB"> </span>w)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>l<span style="color: #BBB"> </span><span style="color: #666">*</span><span style="color: #BBB"> </span>w;
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span><span style="color: #008000; font-weight: bold">static</span><span style="color: #BBB"> </span>areaOfSquare(s)<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #008000; font-weight: bold">return</span><span style="color: #BBB"> </span>areaOfRec(s,<span style="color: #BBB"> </span>s);
+<span style="color: #BBB">  </span>}
+
+<span style="color: #BBB">  </span>instanceMethod()<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span>console.log(<span style="color: #BA2121">&#39;This is an instance of the math class!&#39;</span>);
+<span style="color: #BBB">  </span>}
+}
+</pre></div>
+
+<strong>index.js</strong></p>
+
+<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">import</span><span style="color: #BBB"> </span>MyMath,<span style="color: #BBB"> </span>{<span style="color: #BBB"> </span>addition,<span style="color: #BBB"> </span>asyncAddition<span style="color: #BBB"> </span>}<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">from</span><span style="color: #BBB"> </span><span style="color: #BA2121">&#39;./modules/math.js&#39;</span>;
+</pre></div>
+
+<p>ESM syntax provides the clean, explicit dependency management needed for scalable applications, and it is the standard for both Node.js (server-side) and browser (client-side) JavaScript.</p>
+
+<a href="../section3/index.html">➡️ Continue</a>
+</body>
+</html>

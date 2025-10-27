@@ -172,6 +172,7 @@ class Server {
 
         // Otherwise just assume this is a public request
         // console.log('This is a public request');
+        console.log('Public request');
         this.handlePublic(req, res);
     });
 

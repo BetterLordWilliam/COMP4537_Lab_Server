@@ -1,0 +1,72 @@
+<h1 id="section-1-core-javascript-technicalities"><strong>Section 1: Core JavaScript Technicalities</strong></h1>
+<h2 id="while-we-assume-you-have-a-basic-grasp-of-javascript-the-language-has-a-few-fundamental-quirks-you-must-understand-before-building-a-robust-self-hosted-application.getting-these-technicalities-right-is-key-to-writing-predictable-and-maintainable-node.js-code">While we assume you have a basic grasp of JavaScript, the language has a few fundamental quirks you must understand before building a robust, self-hosted application. Getting these technicalities right is key to writing predictable and maintainable Node.js code.</h2>
+<h2 id="the-legacy-of-var-hoisting-and-scope"><strong>The Legacy of var: Hoisting and Scope</strong></h2>
+<p>The first concept to address is the legacy variable declaration keyword, var.<br />
+var is an older, function-scoped way to declare variables. Its key, often confusing behavior is <strong>hoisting</strong>. When an execution context (like a function) is created, all var declarations are <em>hoisted</em> (moved conceptually) to the very top of that scope.</p>
+<ul>
+<li><strong>Declaration vs. Assignment:</strong> While the declaration is hoisted, the value assignment remains in place.</li>
+<li><strong>The Result:</strong> If you access a var before its explicit assignment in the code, you will get the value <strong>undefined</strong>, not a reference error.</li>
+</ul>
+<h2 id="this-non-intuitive-behavior-is-why-modern-javascript-strongly-discourages-the-use-of-var-in-favor-of-block-scoped-variables-let-and-const">This non-intuitive behavior is why modern JavaScript strongly discourages the use of var in favor of <strong>block-scoped</strong> variables: <strong>let</strong> and <strong>const</strong>.</h2>
+<h2 id="javascripts-asynchronous-nature-the-event-loop-and-two-queues"><strong>JavaScript's Asynchronous Nature: The Event Loop and Two Queues</strong></h2>
+<p>It's common to hear that JavaScript is &quot;asynchronous&quot; or &quot;non-blocking.&quot; While technically true for I/O operations, this can be misleading. Let's get specific:</p>
+<h3 id="the-single-thread-of-execution"><strong>The Single Thread of Execution</strong></h3>
+<p>JavaScript is fundamentally <strong>single-threaded</strong>. This means the JavaScript engine (like V8 in Node.js) can only execute one instruction at a time, regardless of how many cores your computer has.<br />
+This presents a challenge when dealing with common web tasks like network requests, file system access, or waiting for a user click—all of which involve waiting for external resources. To solve this, the engine relies on the <strong>Event Loop</strong> and two separate task queues:</p>
+<h3 id="the-task-queue-macrotasks"><strong>1. The Task Queue (Macrotasks)</strong></h3>
+<p><strong>Tasks</strong> are primarily created by external APIs provided by the runtime (Node.js or the browser). Key examples include:</p>
+<ul>
+<li><strong>Timers:</strong> setTimeout() and setInterval()</li>
+<li><strong>I/O Operations:</strong> Networking and file system events.</li>
+</ul>
+<p>When a task completes, its associated callback function is added to the <strong>Task Queue</strong>.</p>
+<h3 id="the-microtask-queue"><strong>2. The Microtask Queue</strong></h3>
+<p>The <strong>Microtask Queue</strong> was introduced with the advent of <strong>Promises</strong> in JavaScript. A <strong>Promise</strong> is an object representing a future value or error that results from an asynchronous operation.<br />
+When a Promise resolves or rejects, the callbacks attached via .then(), .catch(), or .finally() are added to the <strong>Microtask Queue</strong>.</p>
+<h3 id="event-loop-priority"><strong>Event Loop Priority</strong></h3>
+<p>The <strong>Event Loop</strong> is the mechanism that orchestrates the execution order. It follows a strict priority system once the main <strong>Call Stack</strong> (where all synchronous code runs) is empty:</p>
+<ol>
+<li><strong>Empty the Microtask Queue:</strong> The Event Loop checks the Microtask Queue and runs <em>all</em> microtasks until the queue is completely empty.</li>
+<li><strong>Poll the Task Queue:</strong> Only after the Microtask Queue is empty does the Event Loop take <strong>one</strong> task from the Task Queue and execute its callback.</li>
+</ol>
+<h2 id="crucial-insight-microtasks-like-promise-callbacks-have-a-higher-priority-than-tasks-like-settimeout-callbacks.a-continuous-stream-of-new-microtasks-can-effectively-starve-the-task-queue-delaying-the-execution-of-scheduled-timers-and-io-handlers"><strong>Crucial Insight:</strong> Microtasks (like Promise callbacks) have a higher priority than Tasks (like setTimeout callbacks). A continuous stream of new microtasks can effectively <strong>starve</strong> the Task Queue, delaying the execution of scheduled timers and I/O handlers.</h2>
+<h2 id="abstraction-with-async-and-await"><strong>Abstraction with async and await</strong></h2>
+<p>Manually chaining promises can become complex. Modern JavaScript offers a cleaner syntax on top of Promises: <strong>async/await</strong>.</p>
+<ul>
+<li><strong>async Functions:</strong> Declaring a function as async automatically wraps its return value in a Promise.</li>
+<li><strong>await Keyword:</strong> The await keyword can only be used inside an async function. It pauses the execution of the function until the Promise it precedes is resolved, allowing you to write asynchronous logic that reads just like synchronous code.</li>
+</ul>
+<pre><code class="language-js">// Function that returns a Promise (e.g., a database query)  
+function fetchData() { /\* ... \*/ }
+
+async function processData() {  
+  try {  
+    // Execution pauses here until fetchData resolves  
+    const data \= await fetchData();  
+    console.log(&quot;Data received:&quot;, data);  
+  } catch (error) {  
+    // Rejected promises are caught like synchronous exceptions  
+    console.error(&quot;Failed to fetch:&quot;, error);  
+  }  
+}
+</code></pre>
+<h2 id="this-abstraction-makes-working-with-asynchronous-data-cleaner-and-allows-for-natural-try.catch-error-handling-for-rejected-promises">This abstraction makes working with asynchronous data cleaner and allows for natural <strong>try...catch</strong> error handling for rejected Promises.</h2>
+<h2 id="closures-and-memory-management"><strong>Closures and Memory Management</strong></h2>
+<p>A final technical concept to be mindful of is the <strong>Closure</strong>, which relates to how JavaScript manages memory and scope.<br />
+A <strong>closure</strong> is created when a nested function <strong>remembers and accesses</strong> variables from its parent function's scope, even <em>after</em> the parent function has finished executing.</p>
+<pre><code class="language-js">function createCounter(initialValue) {  
+  let count \= initialValue; // 'count' is the variable that gets closed over
+
+  // The inner function closes over 'count'  
+  return () \=\&gt; count++;  
+}
+
+let counterA \= createCounter(0); // counterA holds a closure over 'count' \= 0
+
+console.log(counterA()); // Output: 0 (count is incremented after use)  
+console.log(counterA()); // Output: 1  
+// The 'count' variable remains in memory, accessible only through 'counterA'.
+</code></pre>
+<h3 id="the-leak-risk"><strong>The Leak Risk</strong></h3>
+<p>While closures are a powerful and intentional feature, be aware that the variables they enclose are <strong>not garbage-collected</strong> as long as the inner function reference exists. Creating an excessive number of closures or unintentionally holding onto large objects within them is a common source of <strong>memory leaks</strong> in long-running Node.js applications. In a self-hosted environment, careful memory management becomes critical.</p>
+
