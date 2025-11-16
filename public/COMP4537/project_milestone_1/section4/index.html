@@ -9,7 +9,8 @@
 <body>
 <a href="../index.html">⬅️ Back</a>
 <a href="../section3/index.html">⬅️ Previous</a>
-<h1>Notice of Non Completion</h1>
+
+<!--
 <p>👷🚧🏗️ This section of the blog is yet to be completed</p>
 <p>This section is going to contain the folloing subsections:</p>
 <ul>
@@ -20,6 +21,152 @@
 </ul>
 <p>unfortunately I have not gotten around to finishing all of my notes for this section.</p>
 <p>additionally I would like to write a section with some of the tips and tricks that I like to use in vanilla JS browser front-end code.</p>
-<a href="../index.html">➡️ Done</a>
+-->
+
+<h1>Section 4: Virtual Machine Provisioning and Deploying Node Server</h1>
+<p>Now to discuss the provisioning of a FREE virtual machine from Oracle and how the application which has been developed can be deployed to it.</p>
+
+
+<hr />
+<h2>4.1 Obtaining an Oracle Cloud Machine</h2>
+<p>The first step along this journey is to create an oracle cloud account.</p>
+<p>Assuming that this is already done, here are the steps to acquire a VM</p>
+<ol>
+    <li>Sign into Oracle Cloud</li>
+    <li>Click the hamburger in the top left</li>
+    <li>Click compute</li>
+    <li>Click instances</li>
+    <li>Click create instance</li>
+    <li>Give the instance a name</li>
+    <li>Choose the Ubuntu image, whatever the LTS is</li>
+    <li>Choose the shape of the instance, <b>VM.Standard.E2.Micro</b> is always free, but you can use <b>VM.Standard.A1.Flex</b> with 4 CPUs and 24GB or RAM for free</li>
+    <li>Click next until you get to the network screen</li>
+    <li>In the SSH keys section, save the generated private and public key</li>
+    <li>Continue clicking next leaving settings at their default values</li>
+    <li>Click Create</li>
+</ol>
+<a href="https://docs.oracle.com/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm">official oracle docs</a>
+
+
+<hr />
+<h2>4.2 SSH Into the Machine</h2>
+<p>Once the machine is provisioned and finishes creating, the next step is to gain access via SSH</p>
+<p>The following instructions assume that you have downloaded SSH keys to the machine that you have provisioned in the previous section.</p>
+<ol>
+    <li>Open a shell on your machine</li>
+    <li>Navigate to the directory where you downloaded the SSH key to</li>
+    <li>Run the following commands</li>
+    <br />
+
+<b>PowerShell</b>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>ssh -i <span style="color: #963">$myprivatekeypath</span> <span style="background-color: #FFF0F0">&quot;ubuntu@$mymachinepublicip&quot;</span>
+</pre></div>
+<b>Bash</b>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>ssh<span style="color: #BBB"> </span>-i<span style="color: #BBB"> </span><span style="color: #963">$myprivatekeypath</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;ubuntu@</span><span style="background-color: #EEE">${</span><span style="color: #963">mymachinepublicip</span><span style="background-color: #EEE">}</span><span style="background-color: #FFF0F0">&quot;</span>
+</pre></div>
+<br />
+
+    <li>If you are using the correct private key and the public IP address of you machine is correct, you will be granted access to the machine</li>
+
+</ol>
+
+<hr />
+<h2>4.3 Installing Node and Npm + UFW Config</h2>
+<p>Now that a machine has been provisioned and you have access to it over SSH, you can install NodeJS and npm </p>
+
+<ol>
+    <li>SSH into the machine</li>
+    <li>Install NodeJS</li>
+    <li>Install npm</li>
+    <br />
+
+<b>Bash</b>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>sudo<span style="color: #BBB"> </span>apt<span style="color: #BBB"> </span>update
+sudo<span style="color: #BBB"> </span>apt<span style="color: #BBB"> </span>install<span style="color: #BBB"> </span>nodejs<span style="color: #BBB"> </span>-y
+
+<span style="color: #888"># verify</span>
+node<span style="color: #BBB"> </span>-v
+npm<span style="color: #BBB"> </span>-v
+</pre></div>
+<br />
+
+    <li>Intall git</li>
+    <br />
+
+    <b>Bash</b>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>sudo<span style="color: #BBB"> </span>apt<span style="color: #BBB"> </span>install<span style="color: #BBB"> </span>git<span style="color: #BBB"> </span>-y
+git<span style="color: #BBB"> </span>--version
+</pre></div>
+<br />
+
+    <li>Use git to clone the repo with the node server you have built</li>
+    <li>Don't forget to install your node dependencies</li>
+    <br />
+
+    <b>Bash</b>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>npm<span style="color: #BBB"> </span>i
+</pre></div>
+
+    <li>In addition to installing all the dependencies, you will need to configure Ubuntu ufw</li>
+    <br />
+    <i>ufw == uncomplicated firewall</i>
+    <br />
+    <br />
+    <li><b>Enable SSH through ufw</b></li>
+    <br />
+    <b>Bash</b>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>sudo<span style="color: #BBB"> </span>ufw<span style="color: #BBB"> </span>allow<span style="color: #BBB"> </span>ssh<span style="color: #BBB"> </span>
+</pre></div>
+    <br />
+
+    <li>Enable access to your server port through ufw</li>
+    <br />
+    <b>Bash</b>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>sudo<span style="color: #BBB"> </span>ufw<span style="color: #BBB"> </span>allow<span style="color: #BBB"> </span>YOUR_PORT_NUMBER/tcp
+</pre></div>
+    <br />
+
+    <li>Enable the ufw</li>
+    <br />
+    <b>Bash</b>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>sudo<span style="color: #BBB"> </span>ufw<span style="color: #BBB"> </span><span style="color: #007020">enable</span>
+</pre></div>
+<br />
+
+</ol>
+
+<a href="https://docs.oracle.com/en-us/iaas/Content/developer/node-on-ol/01oci-ol-node-summary.htm">official oracle docs</a>
+
+<hr />
+<h2>4.4 Internet Traffic Ingress to The Server</h2>
+<p>The final step, allow internet to access your node server</p>
+
+<ol>
+    <li>Click on your instance</li>
+    <li>Goto networking tab</li>
+    <li>Create VNIC or click it if it already exists</li>
+    <li>Goto VNIC subnet, then the security tab of the VNIC subnet</li>
+    <li>Add a security list or edit the default security list</li>
+    <li>Goto security rules page</li>
+    <li>Click Add Ingress Rules</li>
+    <li>Specify the source as the internet 0.0.0.0/0</li>
+    <li>TCP PROTOCOL</li>
+    <li>Destination port as your server port, 6767 for example</li>
+</ol>
+
+<p>
+<b>BEWARE, the internet now will have access to your machine.</b>
+I hope that these collection of guides were either useful & informative or funny.
+</p>
+<img src="http://64.181.233.131:3677/learning_bach.jpg" />
+
+<h3>ENJOY CREATING WEBSITES AND HAVING FUN LEARNING ABOUT WEB DEVELOPMENT FURTHER, I HAVE SO FAR HAD LOTS OF FUN LEARNING THESE TECHNOLOGIES</h3>
+
+<a href="../section5/index.html">➡️ Continue</a>
+<br />
+<a href="https://hilite.me/">code block formatting</a>
+<br />
 </body>
 </html>
+
+<!--https://hilite.me/-->
