@@ -19,8 +19,11 @@
 <p>
     bcrypt package faciliates salting, hashing and then comparing strings against their hashed counterparts (example, verifying a users password matches hashed version).
 </p>
-<p>
-</p>
+<b>cool bcrypt facts</b>
+<ul>
+    <li>SALT IS CONTAINED, don't need to come up with your own salt, you get premium himilayan pink salt</li>
+    <li>compare() function to compare incoming values against hashed ones, very nifty</li>
+</ul>
 
 <hr />
 
@@ -30,6 +33,16 @@
 <p>
     faciliates creating JWTs with information (like the users email address or id so they can be used to identity) and with configurable expire times.
 </p>
+<b>cool jsonwebtoken facts</b>
+<ul>
+    <li>jwt are encoded as base64url and then signed, which ensures the authenticity of the token (ie, some goober cannot modify the state of the token)</li>
+    <li>stateless authentication, meaning that the server doesn't need to track or store session information -- as the guy writing the authentication server for term project, this is a real nice bonus!</li>
+    <li>three parts of a JWT, header, payload, signature</li>
+    <li>widely used, so this is a good thing to know</li>
+    <li>bummer, cannot easily revoke a jwt, it will be valid for its lifetime. Common solution is to give a token two life times, access and refresh tokens, access with shorter lifetimes, and refresh with longer lifetimes -- these of course are used to generate new access tokens.</li>
+</ul>
+<hr />
+
 <a href="https://www.npmjs.com/package/jsonwebtoken">jsonwebtoken npm</a>
 
 <br />
